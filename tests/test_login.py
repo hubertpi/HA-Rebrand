@@ -193,3 +193,38 @@ async def test_later_login_handler_is_not_overwritten(login_harness, caplog):
     await async_unload_entry(hass, settings())
     assert route.handler is third_party
     assert "restart Core" in caplog.text
+
+
+def test_configured_login_favicon_does_not_change_stock_header_logo():
+    html = transform_login_html(login_html(), brand(favicon="data:image/png;base64,ICON"))
+    assert '<link rel="icon" type="image/png" href="data:image/png;base64,ICON">' in html
+    assert 'href="/static/icons/favicon.ico"' not in html
+    assert 'src="/static/icons/favicon-192x192.png"' in html
+
+
+def test_disabled_login_branding_preserves_stock_favicon():
+    original = login_html()
+    assert (
+        transform_login_html(
+            original, brand(login_enabled=False, favicon="data:image/png;base64,ICON")
+        )
+        == original
+    )
+
+
+async def test_one_favicon_setting_applies_to_both_pages_and_unloads(login_harness, tmp_path, png):
+    hass, _, app = login_harness
+    folder = tmp_path / "ha_rebrand_local"
+    folder.mkdir()
+    (folder / "favicon.png").write_bytes(png)
+    entry = settings(favicon="favicon.png")
+    async with TestClient(TestServer(app)) as client:
+        await async_setup_entry(hass, entry)
+        for url in ["/", "/auth/authorize"]:
+            html = await (await client.get(url)).text()
+            assert '<link rel="icon" type="image/png" href="data:image/png;base64,' in html
+            assert 'href="/static/icons/favicon.ico"' not in html
+        await async_unload_entry(hass, entry)
+        restored = await (await client.get("/auth/authorize")).text()
+        assert 'href="/static/icons/favicon.ico"' in restored
+        assert "data:image/png;base64," not in restored

@@ -82,6 +82,19 @@ def transform_login_html(html: str, branding: Branding) -> str:
             "</style>"
         )
         html = html.replace("</head>", style + "</head>", 1)
+    if branding.favicon:
+        # Match icon link elements only, never the stock login header image.
+        html = re.sub(
+            r'<link\b(?=[^>]*\brel=["\'](?:shortcut\s+)?icon["\'])[^>]*>',
+            "",
+            html,
+            flags=re.IGNORECASE,
+        )
+        html = html.replace(
+            "</head>",
+            f'<link rel="icon" type="image/png" href="{branding.favicon}"></head>',
+            1,
+        )
     if branding.login_heading:
         literal = (
             json.dumps(branding.login_heading)

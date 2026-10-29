@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.5
+
+- Apply the configured favicon to the login page as well as the main frontend.
+- Preserve the stock login header logo when only a favicon is configured.
+- Restore the stock login favicon when login branding is disabled or removed.
+
 ## 0.1.4
 
 - Add independently configurable login branding, welcome text, light/dark PNGs,
