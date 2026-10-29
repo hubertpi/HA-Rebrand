@@ -41,9 +41,8 @@ before applying branding. If a transformation unexpectedly fails after setup,
 the original HTML is returned. This guard is not a promise that every future
 frontend layout retaining the same markers will look correct.
 
-The original reference project matched an older inline SVG. HA 2026.10.4 instead
-uses an image referencing `/static/images/home-assistant-logo-loading.svg`.
-That implementation was not carried over.
+The supported loading logo is an image referencing
+`/static/images/home-assistant-logo-loading.svg`.
 
 ## Cleanup and concurrent customization
 

@@ -1,6 +1,6 @@
 # Validation
 
-Initial implementation result: **56 tests passed**. Ruff lint and format checks
+Release validation result: **65 tests passed**. Ruff lint and format checks
 also passed. The test run emitted dependency deprecation warnings from aiohttp
 and backoff; no integration test failed. A headless browser could not be
 provisioned in the development environment, so no browser visual test is claimed.
@@ -35,10 +35,13 @@ small test harness. These are not full Supervisor or production-instance tests.
 - Native initial/options flows, single-entry behavior, clearing old images,
   disabling despite missing assets, and native automatic reload flow type.
 - ASCII-only project text scan and code formatting/lint checks.
+- Safe release version syntax, matching changelog notes, section boundaries,
+  and standard/high-resolution native integration PNG validation.
 
-## First installation checks still needed
+## Browser validation checklist
 
-These checks require the user's HA/browser and have not been performed here:
+The following checks require a running HA instance and a browser; they are not
+part of the automated HTTP test harness:
 
 1. Install from HACS; confirm adding and configuring HA Rebrand succeeds.
 2. Reload Chrome with Network > Disable cache enabled. Confirm immediate loading

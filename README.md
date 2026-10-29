@@ -1,42 +1,72 @@
+**AI-generated project:** HA Rebrand's code, icon, and documentation were created with AI assistance.
+
 # HA Rebrand
 
-Local, English-only loading screen branding for Home Assistant.
+<img src="custom_components/ha_rebrand_local/brand/icon.png" width="96" height="96" alt="HA Rebrand icon">
 
-Show the loading logo centered above the displayed brand name, hide the Open Home
-Foundation loading attribution, and optionally change the browser favicon.
-Uses native Home Assistant configuration screens. No remote JavaScript, custom
-admin panel, telemetry, upload service, or authentication-route replacement.
+Give Home Assistant a custom loading screen with your own logo, name, and favicon.
+Configure everything through Home Assistant's native integration settings.
 
-**Version 0.1.1 is a development release.** Automated tests use Home
-Assistant Core **2026.10.4**, frontend **20260930.5**, and Python **3.14**.
-It still needs a first installation check on your HA instance. Later HA versions
-may require compatibility updates; the minimum version is not a guarantee of
-compatibility with every future release.
+- Center your logo above the brand name.
+- Use separate light and dark PNG logos.
+- Show or hide the Open Home Foundation loading attribution.
+- Set a custom browser tab title and favicon.
+- Enable or disable branding without editing HA's files.
+- Keep settings and logos through updates and restarts.
 
-## Install through HACS
+No external JavaScript, telemetry, upload service, or custom authentication page.
+The integration includes its own icon for Home Assistant's integration screen.
 
-1. Open HACS, select its menu, and open **Custom repositories**.
-2. Add `https://github.com/hubertpi/HA-Rebrand` with type **Integration**.
-3. Find **HA Rebrand** and download it.
+## Requirements
+
+- Home Assistant Core **2026.10.4** or newer; automated compatibility testing uses
+  Core **2026.10.4** and frontend **20260930.5**.
+- HACS for the recommended installation method.
+- Access to your HA configuration directory if you want to add custom PNGs.
+
+The current release is **v0.1.2**. See [release notes](https://github.com/hubertpi/HA-Rebrand/releases)
+and [changelog](CHANGELOG.md). Future HA frontend changes may require an update;
+see [compatibility details](COMPATIBILITY.md).
+
+## Install with HACS
+
+1. Open **HACS** and its **Custom repositories** menu.
+2. Enter `https://github.com/hubertpi/HA-Rebrand` and choose **Integration**.
+3. Find **HA Rebrand** in HACS and download the latest numbered release.
 4. Restart Home Assistant Core.
-5. Open **Settings > Devices & services > Add integration**, and select **HA Rebrand**.
-6. Set the brand name and attribution option. Leave image filenames blank to keep
-   the Home Assistant loading logo and favicon.
-7. Reload the browser to see the result. Use a hard reload if necessary.
+5. Open **Settings > Devices & services > Add integration**.
+6. Search for **HA Rebrand** and add it.
+7. Enter your brand name, choose whether to hide the foundation attribution,
+   and save. You can leave all image fields blank to use the stock HA images.
+8. Hard-refresh your browser with **Ctrl+Shift+R**.
 
-Remove the original `WOOWTECH/Ha_rebrand_manager` integration and restart Core
-before using this one. Our domain is `ha_rebrand_local`; it does not import the
-old integration, migrate its settings, or use its public files.
+Only one HA Rebrand entry is needed. It applies to the instance's frontend for
+all users. Its integration domain is `ha_rebrand_local`.
 
-## Custom logos and favicon
+### Manual installation
 
-Create this directory using your HA file editor, Samba, or Terminal:
+Download the latest release's source ZIP from the
+[Releases page](https://github.com/hubertpi/HA-Rebrand/releases).
+Copy the entire `custom_components/ha_rebrand_local` folder into your HA
+configuration directory's `custom_components` folder, preserving its `brand`
+and `translations` subfolders. Restart Core, then follow steps 5 through 8 above.
+
+## Add your logo and favicon
+
+### 1. Create the image directory
+
+In HA Terminal, run:
 
 ```bash
 mkdir -p /config/ha_rebrand_local
 ```
 
-Copy your PNG files there, for example:
+You can also create the folder with File editor, Studio Code Server, or Samba.
+`/config` means the directory containing your HA `configuration.yaml`.
+
+### 2. Copy your PNG files
+
+Example folder contents:
 
 ```text
 /config/ha_rebrand_local/logo.png
@@ -44,89 +74,124 @@ Copy your PNG files there, for example:
 /config/ha_rebrand_local/favicon.png
 ```
 
-Under **Settings > Devices & services > HA Rebrand > Configure**, enter only the
-basenames, such as `logo.png`. Paths, URLs, SVGs, symlinks, animated PNGs and files
-larger than 2 MiB are rejected. Images may be at most 2048 by 2048 pixels. Use
-transparent PNGs with comfortable padding; the loading logo fits a 96 by 96 box.
-A square favicon is recommended.
+If an image is already in HA's `www` folder, copy it with:
 
-The dark logo follows the browser/OS `prefers-color-scheme` setting during early
-loading. HA's saved theme is not yet available at that stage. If only one logo
-is supplied, it is used for both modes. If both fields are blank, the stock
-Home Assistant loading logo stays in place.
+```bash
+cp /config/www/logo.png /config/ha_rebrand_local/logo.png
+```
 
-PNG content is decoded and re-encoded with metadata removed, then embedded in
-the HTML. There are no public logo endpoints and no additional image requests.
-Your configured brand name and logos are visible to anyone able to load HA's
-index page, just like the default loading screen; do not use sensitive content.
+Keep the exact filename, including capitalization. Use static PNGs up to
+**2 MiB** and **2048 pixels per dimension**. SVGs, animated PNGs, links to files,
+and remote images are not supported. A transparent background works well.
 
-Changing an image file requires reloading the integration, or saving its options,
-then reloading the browser. Files are read only during setup/options validation.
+### 3. Configure the filenames
 
-## Options
+Open **Settings > Devices & services > HA Rebrand > Configure**.
 
-| Option | Behavior |
+| Field | Example value | Purpose |
+| --- | --- | --- |
+| Light logo filename | `logo.png` | Logo for light mode. |
+| Dark logo filename | `logo-dark.png` | Optional alternative for dark mode. |
+| Favicon filename | `favicon.png` | Browser tab icon; a square image is recommended. |
+
+Enter **only the filename**, without `/config`, `/local`, a folder, or a URL.
+Save, then hard-refresh the browser. The loading logo fits a 96 by 96 pixel box
+and appears above the centered name. Wide logos retain their proportions.
+
+If only one loading logo is supplied, it is used in both modes. If neither is
+supplied, HA's loading logo stays in place. To remove a custom image, clear its
+filename field and save. Replacing an existing image file requires reloading
+the integration or saving its options, followed by a browser refresh.
+
+Dark-mode selection follows the browser/OS color preference during early
+loading; HA's saved theme is not yet available at that point.
+
+## Settings
+
+| Option | What it does |
 | --- | --- |
-| Enable branding | Turn this integration's changes on or off. |
-| Brand name | Loading screen text, loading image alt text, and browser tab title. Defaults to Home Assistant; use 1 to 80 printable ASCII characters. |
-| Hide Open Home Foundation attribution | Hide the loading screen attribution while retaining its layout space. Enabled by default. |
-| Light logo filename | PNG basename inside `/config/ha_rebrand_local`. Optional. |
+| Enable branding | Apply branding. Turn off to restore stock HTML on the next browser load. |
+| Brand name | Loading screen text, image alt text, and fixed browser tab title. Use 1 to 80 printable ASCII characters. |
+| Hide Open Home Foundation attribution | Hide the loading attribution while retaining its layout space. Enabled by default. |
+| Light logo filename | Optional PNG in `/config/ha_rebrand_local`. |
 | Dark logo filename | Optional PNG for a dark browser/OS color scheme. |
 | Favicon filename | Optional PNG for the browser tab. |
 
-Settings live only in the native config entry options. There is no YAML or
-parallel JSON configuration. All code, documentation, and supplied UI text is
-English. No non-English translation files are included.
+Settings are stored in HA's native config entry. No YAML or separate JSON
+configuration is needed. Code, documentation, and supplied interface text are
+English-only.
 
-The brand name changes visible loading/tab branding; it does not rename the HA
-installation in its backend configuration. A custom tab name stays fixed when
-navigating dashboards. The sidebar, login page, onboarding page, installed PWA
-icons/name, mobile app native splash, and theme accent colors remain stock in
-this version. Mobile WebView loading behavior still requires device testing.
+The name controls visible loading/tab branding. It does not change the instance
+name in HA's backend settings. The sidebar, login page, onboarding page, installed
+PWA name/icons, mobile app native splash, and theme colors are outside this
+integration's scope.
 
-## Disable, remove, and recover
+## Update through HACS
 
-- To disable, uncheck **Enable branding** in Configure, or disable the integration
-  in HA. Saving options reloads the integration automatically.
-- To remove, delete the integration entry in HA, then remove it from HACS.
-- Reload every open browser tab/WebView afterward. A document already loaded in
-  a browser retains its current title script until the document is reloaded.
-- User-supplied PNGs in `/config/ha_rebrand_local` are deliberately preserved.
-  Remove that directory manually if you no longer want those images.
+1. Refresh HACS and open **HA Rebrand**.
+2. Install the latest numbered release, for example **v0.1.2**.
+3. Restart Home Assistant Core.
+4. Hard-refresh open browser tabs. Reload companion app WebViews if used.
 
-Unloading restores the exact original index template in the running HA process.
-Core and frontend package files are never modified. If another component has
-replaced the same template after HA Rebrand, this integration preserves that
-component's replacement and logs a warning; restart Core to finish cleanup.
+Your options and PNG files stay saved. If you previously downloaded **main**,
+use HACS's redownload/version selector to choose a numbered release once.
+That switches your installation to release-based version tracking.
 
-If the UI becomes inaccessible, remove
+HACS gets version numbers from **published GitHub releases**, rather than only
+from the integration manifest. Each new version on main is tested before the
+release workflow publishes its tag and changelog notes. An existing release is
+never overwritten. Pull requests do not publish releases.
+
+The bundled integration icon is served by HA's native branding system. Some
+older HACS versions still display an upstream placeholder in their own cards,
+even when the icon works in **Settings > Devices & services**. The integration
+icon is separate from the loading logo and favicon you configure.
+
+## Disable or uninstall
+
+To pause branding, turn off **Enable branding** in Configure, save, and refresh
+your browser. You can also disable the integration entry in HA.
+
+To uninstall:
+
+1. Delete the HA Rebrand entry under **Settings > Devices & services**.
+2. Remove HA Rebrand from HACS, or remove its custom component folder if installed manually.
+3. Reload open browser tabs. A loaded document retains its title behavior until refreshed.
+4. Optionally delete `/config/ha_rebrand_local` if you no longer need your images.
+
+Unloading restores the previous index template. HA package files are never
+modified. If another component has replaced the template after HA Rebrand, a
+warning is logged; restart Core to clear the remaining in-memory changes.
+
+## Troubleshooting
+
+| Symptom | What to check |
+| --- | --- |
+| Integration is not listed | Confirm `custom_components/ha_rebrand_local/manifest.json` exists, then restart Core. |
+| Image validation fails | Check filename capitalization, directory, PNG content, file size, and dimensions. Enter only a basename. |
+| Old image or title remains | Save the options or reload the integration, then hard-refresh the browser. |
+| HACS shows a commit hash | Select a published numbered release instead of main. |
+| Integration icon has not appeared | Restart Core and refresh. HA caches brand images; older HACS cards may use their own placeholder. |
+| Branding setup fails after an HA update | Check HA logs and this repository's compatibility notes/releases. The adapter rejects unsupported loading HTML. |
+
+If you cannot reach the UI, remove
 `/config/custom_components/ha_rebrand_local` through Terminal/file access and
-restart Core. HA safe mode skips custom integrations and is another recovery
-option. Do not edit `.storage` files to remove this integration.
+restart Core. HA safe mode also skips custom integrations. Do not edit `.storage`
+files to remove the integration.
 
-## Architecture and compatibility
+## Technical details
 
-The loading logo and foundation attribution are already present in the initial
-server HTML. `frontend.add_extra_js_url()` runs later and cannot prevent an
-initial flash of stock branding. For immediate branding, this implementation
-wraps **one instance's `IndexView._template_cache`** with a Jinja template adapter.
-This is a private HA implementation detail, documented in [COMPATIBILITY.md](COMPATIBILITY.md).
+The adapter wraps one instance's loading template and transforms the finished
+HTML. It restores the previous template on unload. It does not replace login
+routes, change authentication, read tokens, or modify HA package files. PNGs are
+validated, stripped of metadata, and embedded in the loading HTML. Your brand
+name and images are public to anyone who can load the index, so do not use
+sensitive content.
 
-The adapter first renders the original template unchanged, then transforms only
-known launch screen/title markers. User input never becomes Jinja source. It
-adds scoped CSS and, for a custom name, a small inline title observer. This uses
-the same script environment as HA's existing inline startup scripts and needs
-no disabled browser security settings.
+See [security](SECURITY.md), [compatibility](COMPATIBILITY.md),
+[validation](TESTING.md), and [dependency notices](THIRD_PARTY_NOTICES.md).
 
-It never patches the `IndexView` class or `get_template`, rewrites HA package
-files, modifies the router, replaces `/auth/authorize` or `/onboarding`, or reads
-authentication tokens. Setup rejects unfamiliar template markers. Runtime
-transformation errors return the original HTML and log once per wrapper.
-
-See [SECURITY.md](SECURITY.md), [TESTING.md](TESTING.md), and
-[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
-
-## Development
+## Development and releases
 
 Use Python 3.14 on Linux:
 
@@ -138,6 +203,13 @@ python -m venv .venv
 .venv/bin/python -m pytest -q
 ```
 
-Tests install the actual pinned Core and frontend packages. The HTTP harness
-uses real `IndexView` and aiohttp with controlled HA state; it is not a complete
-production HA installation. No production HA instance is contacted by the tests.
+To publish a new version, bump `custom_components/ha_rebrand_local/manifest.json`
+and add a matching `CHANGELOG.md` section. Push to main. The test job runs first;
+a successful run publishes the version as `v<major>.<minor>.<patch>` using
+GitHub's built-in token. No personal access token is required.
+
+The editable integration icon is `assets/icon.svg`; its PNG exports are bundled
+in the component's `brand` directory at 256 and 512 pixels. Runtime users do not
+need an SVG renderer.
+
+Licensed under [MIT](LICENSE).
