@@ -104,6 +104,10 @@ def transform_login_html(html: str, branding: Branding) -> str:
             f'<link rel="icon" type="image/png" href="{branding.favicon}"></head>',
             1,
         )
+    if branding.touch_icon:
+        html = html.replace(
+            "</head>", f'<link rel="apple-touch-icon" href="{branding.touch_icon}"></head>', 1
+        )
     if branding.login_heading:
         literal = (
             json.dumps(branding.login_heading)

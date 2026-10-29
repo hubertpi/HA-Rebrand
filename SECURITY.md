@@ -3,7 +3,11 @@
 This is a frontend customization, not an authentication or security component.
 
 - No network client, telemetry, remote import, subprocess, external executable,
-  new HTTP/WebSocket endpoint, or token access exists in the integration.
+  configuration API, WebSocket endpoint, or token access exists in the integration.
+- One public read-only icon endpoint serves only generated in-memory PNGs for
+  active branding. It cannot read arbitrary filenames, receive uploads, change
+  settings, return source files, or expose credentials. Unknown/inactive icons
+  return 404; non-GET methods are not registered.
 - Native HA config entry/options flows manage settings with HA's own access
   controls. There is no separate configuration API to secure.
 - The integration reads only simple PNG basenames from a dedicated directory
@@ -62,3 +66,24 @@ object, unchanged synthetic POST payloads to auth APIs, and exact restoration.
 
 These tests validate presentation isolation; they are not a complete end-to-end
 security audit of Home Assistant's authentication system.
+
+## Browser and installed-web-app icons
+
+Browsers and Android installers need to fetch public icons without a logged-in
+HA session. `/api/ha_rebrand_local/icon/{content-hash}.png` therefore deliberately
+uses `requires_auth = False`. The lookup key only selects precomputed PNG bytes
+in the active runtime dictionary; it is never used as a filesystem path. The
+response uses image/png and nosniff. Its cache lifetime is long because its URL
+is a SHA-256 hash of the exact bytes; pixel changes generate a different URL.
+
+Icons are resized/padded in an executor from the already validated local PNGs.
+No new image files are written and no arbitrary remote image is fetched. Treat
+these pixels and the manifest brand name as public, just like the loading page.
+On disable/removal, the endpoint returns 404 and owned manifest fields are
+restored. Browser/device caches can still retain old icons until refreshed or
+an installed shortcut is recreated.
+
+PWA branding uses HA's public `frontend.add_manifest_json_key` helper for name,
+short_name and icons only. The existing app id, start URL, scope, theme metadata,
+permissions and unrelated manifest fields are preserved. A later third-party
+change to an owned field is not overwritten during cleanup.

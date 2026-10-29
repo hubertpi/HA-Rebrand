@@ -91,6 +91,35 @@ Open browser documents require reloading after changes or removal.
 
 Only Core 2026.10.4 / frontend 20260930.5 has been tested automatically. No claims
 are made yet for 2026.11 beta versions, frontend development builds, companion
-app native splash screens, installed PWA branding, reverse-proxy HTML rewriting,
+app native splash screens, reverse-proxy HTML rewriting,
 or arbitrary third-party themes. Separate light/dark images follow the browser
 color preference available before HA startup.
+
+## Android and web app manifest
+
+The public `frontend.add_manifest_json_key` helper updates HA's existing web app
+manifest name, short_name and icons. No manifest route is replaced. Original
+values are retained and restored only while the field still equals our installed
+value. HA's app id, start URL, scope, theme fields and other metadata remain intact.
+
+The icon source is the explicit web app icon, then favicon, then a loading logo.
+The integration produces 192/512 pixel square icons with transparent padding,
+marked purpose any rather than maskable to avoid cropping an arbitrary logo.
+Browser favicons use 64 pixel PNG URLs and touch icons use 180 pixel PNG URLs.
+Loading and login header logos remain embedded and keep their independent sizes.
+
+Icons are served from one public native HA view, registered once through
+`hass.http.register_view`. HA supports dynamic registration on its production
+router. The view remains registered but returns 404 with no active runtime;
+no private router resource removal is needed on unload.
+
+Android generates its native splash from manifest metadata, and controls its
+layout. Chrome/Android caches installed web app icons independently of page HTML.
+Testing in a fresh tab is not sufficient to prove an old installed shortcut has
+updated; recreate the shortcut/web app to force a fresh install. These features
+have server-level tests against Core 2026.10.4, not an Android emulator test.
+
+Source references:
+- https://developer.chrome.com/docs/lighthouse/pwa/splash-screen
+- https://web.dev/articles/manifest-updates
+- https://developer.chrome.com/blog/improvements-to-web-app-updates

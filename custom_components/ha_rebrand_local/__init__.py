@@ -11,6 +11,14 @@ from homeassistant.exceptions import ConfigEntryError
 from .branding import BrandedTemplate, CompatibilityError, load_branding, transform_html
 from .const import DEFAULTS, DOMAIN
 from .login import LoginHook, prepare_login_hook
+from .mobile import (
+    ManifestBranding,
+    MobileAssets,
+    ensure_icon_view,
+    prepare_manifest,
+    prepare_mobile_assets,
+    with_mobile_urls,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -23,6 +31,8 @@ class Runtime:
     original: object
     branded: BrandedTemplate
     login: LoginHook | None = None
+    mobile: MobileAssets | None = None
+    manifest: ManifestBranding | None = None
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
@@ -49,6 +59,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         raise ConfigEntryError("Frontend development repositories are not supported")
     try:
         branding = await hass.async_add_executor_job(load_branding, hass.config.config_dir, options)
+        mobile = await hass.async_add_executor_job(prepare_mobile_assets, branding)
+        branding = with_mobile_urls(branding, mobile)
+        manifest = prepare_manifest(branding, mobile)
         original = await hass.async_add_executor_job(view.get_template)
         if isinstance(original, BrandedTemplate):
             raise CompatibilityError("A branding wrapper is already present")
@@ -67,18 +80,23 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             "Another component changed the index template during setup; branding was not applied"
         )
     branded = BrandedTemplate(original, branding)
+    if mobile.files:
+        ensure_icon_view(hass)
     if login is not None:
         login.install()
+    manifest.install()
     # Compatibility-sensitive hook: HA 2026.10.4 reads this cache directly.
     # Do not override IndexView methods, change routes, or clear global caches.
     view._template_cache = branded
-    hass.data[DOMAIN] = Runtime(view, original, branded, login)
+    hass.data[DOMAIN] = Runtime(view, original, branded, login, mobile, manifest)
     return True
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Restore only the template we own, preserving any later third-party hook."""
     if (runtime := hass.data.pop(DOMAIN, None)) is not None:
+        if runtime.manifest is not None:
+            runtime.manifest.restore()
         if runtime.login is not None:
             runtime.login.restore()
         if runtime.view._template_cache is runtime.branded:

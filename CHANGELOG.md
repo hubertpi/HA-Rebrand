@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.1.7
+
+- Add configurable Android/installed-web-app branding through HA's native
+  manifest name and icon helpers, with 192 and 512 pixel PNGs.
+- Serve browser, touch and app icons as same-origin PNG URLs with content hashes
+  for mobile compatibility and cache invalidation.
+- Allow a separate Android/web app icon; default to the configured favicon,
+  then the loading logo. Preserve image proportions with square padding.
+- Restore prior manifest fields on disable/removal and document shortcut recreation.
+
 ## 0.1.6
 
 - Apply the configured brand name to the login browser tab title.

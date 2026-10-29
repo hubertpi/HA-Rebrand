@@ -16,4 +16,6 @@ DEFAULTS = {
     "login_logo_light": "",
     "login_logo_dark": "",
     "login_logo_width": 320,
+    "pwa_enabled": True,
+    "pwa_icon": "",
 }

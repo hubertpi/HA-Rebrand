@@ -51,6 +51,9 @@ class Branding:
     login_light: str | None = None
     login_dark: str | None = None
     login_logo_width: int = DEFAULTS["login_logo_width"]
+    pwa_enabled: bool = DEFAULTS["pwa_enabled"]
+    pwa_icon: str | None = None
+    touch_icon: str | None = None
 
 
 def load_branding(config_directory: str, options: dict) -> Branding:
@@ -67,7 +70,8 @@ def load_branding(config_directory: str, options: dict) -> Branding:
     ):
         raise ValueError("Brand name must contain 1 to 80 printable English characters")
     if any(
-        type(values[key]) is not bool for key in ("enabled", "hide_foundation", "login_enabled")
+        type(values[key]) is not bool
+        for key in ("enabled", "hide_foundation", "login_enabled", "pwa_enabled")
     ):
         raise ValueError("Branding toggles must be boolean")
     light = read_asset(config_directory, values["logo_light"])
@@ -109,6 +113,8 @@ def load_branding(config_directory: str, options: dict) -> Branding:
         login_light,
         login_dark,
         int(login_width) if values["login_enabled"] else 320,
+        values["pwa_enabled"],
+        read_asset(config_directory, values["pwa_icon"]) if values["pwa_enabled"] else None,
     )
 
 
@@ -161,6 +167,21 @@ def transform_html(html: str, branding: Branding) -> str:
     if branding.favicon:
         html = re.sub(r'<link\b(?=[^>]*\brel=["\']icon["\'])[^>]*>', "", html, flags=re.IGNORECASE)
         additions += f'<link rel="icon" type="image/png" href="{branding.favicon}">'
+    if branding.touch_icon:
+        html = re.sub(
+            r'<link\b(?=[^>]*\brel=["\'](?:apple-touch-icon|mask-icon)["\'])[^>]*>',
+            "",
+            html,
+            flags=re.IGNORECASE,
+        )
+        additions += f'<link rel="apple-touch-icon" href="{branding.touch_icon}">'
+    if branding.pwa_enabled:
+        html = re.sub(
+            r'(<meta\b(?=[^>]*\bname=["\'](?:application-name|apple-mobile-web-app-title)["\'])[^>]*\bcontent=)["\'][^"\']*["\']',
+            lambda match: match.group(1) + '"' + name + '"',
+            html,
+            flags=re.IGNORECASE,
+        )
     if branding.name != DEFAULTS["brand_name"]:
         # The name is serialized for an HTML script context, not interpolated as code.
         literal = (

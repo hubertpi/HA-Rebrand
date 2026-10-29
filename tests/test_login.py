@@ -224,7 +224,7 @@ async def test_one_favicon_setting_applies_to_both_pages_and_unloads(login_harne
         await async_setup_entry(hass, entry)
         for url in ["/", "/auth/authorize"]:
             html = await (await client.get(url)).text()
-            assert '<link rel="icon" type="image/png" href="data:image/png;base64,' in html
+            assert '<link rel="icon" type="image/png" href="/api/ha_rebrand_local/icon/' in html
             assert 'href="/static/icons/favicon.ico"' not in html
             assert "<title>Facility Portal</title>" in html
         await async_unload_entry(hass, entry)

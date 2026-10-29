@@ -17,7 +17,9 @@
           "login_heading": "Login welcome text",
           "login_logo_light": "Login light logo filename",
           "login_logo_dark": "Login dark logo filename",
-          "login_logo_width": "Login logo width"
+          "login_logo_width": "Login logo width",
+          "pwa_enabled": "Brand Android / installed web app",
+          "pwa_icon": "Android / web app icon filename"
         },
         "data_description": {
           "enabled": "Turn off to restore stock branding after reloading your browser.",
@@ -31,7 +33,9 @@
           "login_heading": "Defaults to Welcome. Leave blank to keep Home Assistant's English welcome message. Up to 80 printable English characters.",
           "login_logo_light": "Optional PNG basename in /config/ha_rebrand_local. Leave both login logo fields blank to reuse your loading logos.",
           "login_logo_dark": "Optional dark-mode login PNG. If you set only one login logo, it is used in both modes.",
-          "login_logo_width": "Width in pixels, from 96 to 800. Defaults to 320; the logo is limited by the login column and viewport."
+          "login_logo_width": "Width in pixels, from 96 to 800. Defaults to 320; the logo is limited by the login column and viewport.",
+          "pwa_enabled": "Use your brand name and app icon in HA's web app manifest. Reinstall existing shortcuts to refresh Android's saved splash and icon.",
+          "pwa_icon": "Optional local PNG basename. Blank uses the favicon, then your loading logo. A square, high-resolution image is recommended."
         }
       }
     },
@@ -62,7 +66,9 @@
           "login_heading": "Login welcome text",
           "login_logo_light": "Login light logo filename",
           "login_logo_dark": "Login dark logo filename",
-          "login_logo_width": "Login logo width"
+          "login_logo_width": "Login logo width",
+          "pwa_enabled": "Brand Android / installed web app",
+          "pwa_icon": "Android / web app icon filename"
         },
         "data_description": {
           "enabled": "Turn off to restore stock branding after reloading your browser.",
@@ -76,7 +82,9 @@
           "login_heading": "Defaults to Welcome. Leave blank to keep Home Assistant's English welcome message. Up to 80 printable English characters.",
           "login_logo_light": "Optional PNG basename in /config/ha_rebrand_local. Leave both login logo fields blank to reuse your loading logos.",
           "login_logo_dark": "Optional dark-mode login PNG. If you set only one login logo, it is used in both modes.",
-          "login_logo_width": "Width in pixels, from 96 to 800. Defaults to 320; the logo is limited by the login column and viewport."
+          "login_logo_width": "Width in pixels, from 96 to 800. Defaults to 320; the logo is limited by the login column and viewport.",
+          "pwa_enabled": "Use your brand name and app icon in HA's web app manifest. Reinstall existing shortcuts to refresh Android's saved splash and icon.",
+          "pwa_icon": "Optional local PNG basename. Blank uses the favicon, then your loading logo. A square, high-resolution image is recommended."
         }
       }
     },

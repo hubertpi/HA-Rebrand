@@ -3,6 +3,7 @@
 import asyncio
 import io
 import sys
+from copy import deepcopy
 from functools import partial
 from pathlib import Path
 from types import SimpleNamespace
@@ -27,6 +28,9 @@ def png():
 
 def make_harness(tmp_path, monkeypatch, real_login=False):
     app = web.Application()
+    monkeypatch.setattr(
+        frontend, "MANIFEST_JSON", frontend.Manifest(deepcopy(frontend.MANIFEST_JSON.manifest))
+    )
 
     async def executor(function, *args):
         return await asyncio.to_thread(function, *args)
@@ -42,6 +46,22 @@ def make_harness(tmp_path, monkeypatch, real_login=False):
         http=SimpleNamespace(app=app),
     )
     app[KEY_HASS] = hass
+    # HA keeps its production router open for dynamic view registration. This
+    # isolated frozen-router harness registers the public icon view up front.
+    from custom_components.ha_rebrand_local.mobile import ICON_PATH, VIEW_REGISTERED, IconView
+
+    icon_view = IconView(hass)
+
+    async def icon(request):
+        return await icon_view.get(request, request.match_info["filename"])
+
+    app.router.add_get(ICON_PATH + "{filename}", icon)
+
+    async def manifest(request):
+        return frontend.ManifestJSONView().get(request)
+
+    app.router.add_get("/manifest.json", manifest)
+    hass.data[VIEW_REGISTERED] = True
     view = frontend.IndexView(None, hass)
 
     async def authorize(request):

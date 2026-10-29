@@ -12,6 +12,7 @@ Configure everything through Home Assistant's native integration settings.
 - Show or hide the Open Home Foundation loading attribution.
 - Set a custom browser tab title and favicon.
 - Customize the login logo, logo size, and welcome heading independently.
+- Brand Android home-screen web apps with a custom app name and icon.
 - Enable or disable branding without editing HA's files.
 - Keep settings and logos through updates and restarts.
 
@@ -25,7 +26,7 @@ The integration includes its own icon for Home Assistant's integration screen.
 - HACS for the recommended installation method.
 - Access to your HA configuration directory if you want to add custom PNGs.
 
-The current release is **v0.1.6**. See [release notes](https://github.com/hubertpi/HA-Rebrand/releases)
+The current release is **v0.1.7**. See [release notes](https://github.com/hubertpi/HA-Rebrand/releases)
 and [changelog](CHANGELOG.md). Future HA frontend changes may require an update;
 see [compatibility details](COMPATIBILITY.md).
 
@@ -138,6 +139,42 @@ errors, authentication-provider warnings, username/password fields and submissio
 buttons keep their stock behavior. The small heading script updates text nodes
 without replacing the form or HA's component elements.
 
+## Android shortcuts and installed web apps
+
+Android can show two different screens when opening HA from a home-screen icon:
+the OS/browser-generated web app splash, followed by HA's own loading screen.
+The first comes from the web app manifest; the second uses your loading logo.
+Android controls the native splash layout, so it uses an app icon rather than
+reproducing HA's full loading screen.
+
+**Brand Android / installed web app** is enabled by default. It sets the web app
+name from **Brand name**. The optional **Android / web app icon filename** uses
+the same local PNG directory as your other images. If blank, it uses your
+favicon; if there is no favicon, it uses your light or dark loading logo.
+For a company logo on the Android splash instead of your browser favicon,
+enter that PNG explicitly in this field.
+
+The integration produces square 192 and 512 pixel PNG icons, preserving and
+padding the original proportions without cropping. A square high-resolution
+source gives the clearest app icon. Browser favicons use normal PNG URLs,
+rather than embedded data URLs, for mobile compatibility. Touch-icon links are
+also updated.
+
+After updating or changing app branding:
+
+1. Restart Core after the integration update and open HA in a regular Chrome tab.
+2. Reload the page. Confirm your favicon and web app name are current.
+3. Remove the old home-screen shortcut. If Android installed it as a web app,
+   uninstall that web app from its app-info screen.
+4. From Chrome's menu, add/install HA to the home screen again.
+5. Launch the new shortcut. Android may otherwise keep the icon/splash cached
+   from its original installation even when the in-page branding is current.
+
+You do not need to clear all Chrome data or remove the HA Companion app.
+This feature does not change the native HA Companion application's own splash
+or app icon. Existing installed web apps may update automatically, but their
+refresh schedule is controlled by Chrome/Android.
+
 ## Settings
 
 | Option | What it does |
@@ -148,7 +185,9 @@ without replacing the form or HA's component elements.
 | Hide Open Home Foundation attribution | Hide the loading attribution while retaining its layout space. Enabled by default. |
 | Light logo filename | Optional PNG in `/config/ha_rebrand_local`. |
 | Dark logo filename | Optional PNG for a dark browser/OS color scheme. |
-| Favicon filename | Optional PNG for the frontend tab and the login tab when login branding is enabled. |
+| Favicon filename | Optional PNG for frontend/login tabs, served from a normal PNG URL for mobile compatibility. |
+| Brand Android / installed web app | Customize the web app manifest name and icons. Enabled by default. |
+| Android / web app icon filename | Optional local PNG; otherwise use the favicon, then a loading logo. |
 | Enable login branding | Customize login presentation, or use the stock page when disabled. |
 | Login welcome text | Defaults to Welcome; blank keeps HA's English welcome message. |
 | Login light/dark logo filename | Optional independent login PNGs; both blank reuse the loading logos. |
@@ -159,14 +198,14 @@ configuration is needed. Code, documentation, and supplied interface text are
 English-only.
 
 The name controls visible loading/tab branding. It does not change the instance
-name in HA's backend settings. The sidebar, onboarding page, installed PWA name/icons, mobile app native splash,
+name in HA's backend settings. The sidebar, onboarding page, native Companion app splash/icon,
 and theme colors are outside this
 integration's scope.
 
 ## Update through HACS
 
 1. Refresh HACS and open **HA Rebrand**.
-2. Install the latest numbered release, for example **v0.1.6**.
+2. Install the latest numbered release, for example **v0.1.7**.
 3. Restart Home Assistant Core.
 4. Hard-refresh open browser tabs. Reload companion app WebViews if used.
 
@@ -198,7 +237,8 @@ To uninstall:
 3. Reload open browser tabs. A loaded document retains its title behavior until refreshed.
 4. Optionally delete `/config/ha_rebrand_local` if you no longer need your images.
 
-Unloading restores the previous index template and static login-page handler.
+Unloading restores the previous index template, static login-page handler, and
+owned web app manifest fields. Public icon URLs become unavailable.
 HA package files are never modified. If another component has replaced either
 hook after HA Rebrand, a warning is logged; restart Core to clear the remaining
 in-memory changes.
@@ -210,6 +250,7 @@ in-memory changes.
 | Integration is not listed | Confirm `custom_components/ha_rebrand_local/manifest.json` exists, then restart Core. |
 | Image validation fails | Check filename capitalization, directory, PNG content, file size, and dimensions. Enter only a basename. |
 | Logo looks too small | Increase **Loading logo width**. If the PNG has empty transparent margins, crop those margins in an image editor. |
+| Android shortcut still shows old branding | Recreate the shortcut or installed web app after opening the updated page in Chrome. |
 | Old image or title remains | Save the options or reload the integration, then hard-refresh the browser. |
 | HACS shows a commit hash | Select a published numbered release instead of main. |
 | Integration icon has not appeared | Restart Core and refresh. HA caches brand images; older HACS cards may use their own placeholder. |
@@ -227,7 +268,9 @@ HTML. Login branding wraps the existing static GET `/auth/authorize` handler,
 retaining its route and stock bootstrap scripts. These are private compatibility
 hooks and are restored on unload. Authentication APIs, provider choices, tokens,
 redirects and credential handling are not changed; HA package files are never modified. PNGs are
-validated, stripped of metadata, and embedded in the loading HTML. Your brand
+validated and stripped of metadata. Logos are embedded; generated browser/PWA
+icons are served from a public, read-only endpoint that can return only the
+in-memory PNGs for the active configuration, never arbitrary files. Your brand
 name and images are public to anyone who can load the index, so do not use
 sensitive content.
 

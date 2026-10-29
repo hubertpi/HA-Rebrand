@@ -25,6 +25,8 @@ def schema(values):
             vol.Optional("logo_light", default=values["logo_light"]): str,
             vol.Optional("logo_dark", default=values["logo_dark"]): str,
             vol.Optional("favicon", default=values["favicon"]): str,
+            vol.Required("pwa_enabled", default=values["pwa_enabled"]): bool,
+            vol.Optional("pwa_icon", default=values["pwa_icon"]): str,
             vol.Required("login_enabled", default=values["login_enabled"]): bool,
             vol.Optional("login_heading", default=values["login_heading"]): str,
             vol.Optional("login_logo_light", default=values["login_logo_light"]): str,

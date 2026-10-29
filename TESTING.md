@@ -1,6 +1,6 @@
 # Validation
 
-Release validation result: **106 Python tests and 7 DOM tests passed**. Ruff lint and format checks
+Release validation result: **116 Python tests and 7 DOM tests passed**. Ruff lint and format checks
 also passed. The test run emitted dependency deprecation warnings from aiohttp
 and backoff; no integration test failed. A headless browser could not be
 provisioned in the development environment, so no browser visual test is claimed.
@@ -63,6 +63,22 @@ The HTTP tests use the real packaged authorize HTML and stock HA file handler.
 Auth API endpoints are controlled sentinels, not a production credential flow.
 Browser login/MFA should also be verified on the target HA instance.
 
+## Android and mobile icon coverage
+
+- Real generated PNG size/content-hash checks, deterministic URLs, and changes
+  to the URL when pixels change.
+- Proportion-preserving padding for wide logos and independent PWA/favicon sources.
+- Manifest name/icons updated through native HA helpers, with app identity,
+  start URL, scope, theme and unrelated fields preserved.
+- Exact restoration of owned manifest fields, preservation of later changes,
+  and public icon responses becoming unavailable after unload.
+- Native HA view registration, anonymous PNG GET, rejected POST/arbitrary names,
+  image MIME/nosniff/cache headers, and idempotent route registration.
+- Live frontend/login icon URLs, touch links, manifest JSON and icon downloads.
+
+These are server/DOM tests; they do not simulate Android's OS splash or Chrome's
+installed-web-app update schedule. Those need testing on the target device.
+
 ## Browser validation checklist
 
 The following checks require a running HA instance and a browser; they are not
@@ -81,6 +97,7 @@ part of the automated HTTP test harness:
 9. Disable/delete the integration, reload the browser, and confirm stock branding.
 10. Check HA logs for new integration errors.
 
-Native mobile splash screens and installed PWA icons are outside this version's
-scope. A custom title only persists within the loaded frontend document; tabs
+The native Companion app splash/icon is outside this version's scope.
+Android's installed web app splash uses manifest branding, but Android controls
+its layout and Chrome controls installed-icon refresh. A custom title only persists within the loaded frontend document; tabs
 must be reloaded after disabling or removal.
