@@ -1,0 +1,62 @@
+{
+  "title": "HA Rebrand",
+  "config": {
+    "step": {
+      "user": {
+        "title": "HA Rebrand",
+        "description": "Customize the initial loading screen. Settings apply to new browser loads. The login page stays unchanged. See the README for PNG setup.",
+        "data": {
+          "enabled": "Enable branding",
+          "brand_name": "Brand name",
+          "hide_foundation": "Hide Open Home Foundation attribution",
+          "logo_light": "Light logo filename",
+          "logo_dark": "Dark logo filename",
+          "favicon": "Favicon filename"
+        },
+        "data_description": {
+          "enabled": "Turn off to restore stock branding after reloading your browser.",
+          "brand_name": "Loading text and browser tab title. Use 1 to 80 printable English characters.",
+          "hide_foundation": "Hide the foundation logo and attribution on the initial loading screen.",
+          "logo_light": "Optional PNG basename in /config/ha_rebrand_local, for example logo.png. Leave blank for the stock logo.",
+          "logo_dark": "Optional PNG for the browser or operating system dark color scheme.",
+          "favicon": "Optional PNG basename for the browser tab icon."
+        }
+      }
+    },
+    "error": {
+      "invalid_asset": "Cannot read a valid local PNG. Check the directory and filename. Use a static PNG up to 2 MiB and 2048 pixels per dimension; paths, URLs and symlinks are not allowed.",
+      "invalid_name": "Enter 1 to 80 printable English characters without line breaks."
+    },
+    "abort": {
+      "already_configured": "HA Rebrand is already configured."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "HA Rebrand",
+        "description": "Customize the initial loading screen. Settings apply to new browser loads. The login page stays unchanged. See the README for PNG setup.",
+        "data": {
+          "enabled": "Enable branding",
+          "brand_name": "Brand name",
+          "hide_foundation": "Hide Open Home Foundation attribution",
+          "logo_light": "Light logo filename",
+          "logo_dark": "Dark logo filename",
+          "favicon": "Favicon filename"
+        },
+        "data_description": {
+          "enabled": "Turn off to restore stock branding after reloading your browser.",
+          "brand_name": "Loading text and browser tab title. Use 1 to 80 printable English characters.",
+          "hide_foundation": "Hide the foundation logo and attribution on the initial loading screen.",
+          "logo_light": "Optional PNG basename in /config/ha_rebrand_local, for example logo.png. Leave blank for the stock logo.",
+          "logo_dark": "Optional PNG for the browser or operating system dark color scheme.",
+          "favicon": "Optional PNG basename for the browser tab icon."
+        }
+      }
+    },
+    "error": {
+      "invalid_asset": "Cannot read a valid local PNG. Check the directory and filename. Use a static PNG up to 2 MiB and 2048 pixels per dimension; paths, URLs and symlinks are not allowed.",
+      "invalid_name": "Enter 1 to 80 printable English characters without line breaks."
+    }
+  }
+}
