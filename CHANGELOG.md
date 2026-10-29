@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.1.4
+
+- Add independently configurable login branding, welcome text, light/dark PNGs,
+  and logo width, defaulting to the loading logos and the heading Welcome.
+- Preserve the existing static login route, auth bootstrap scripts, credential
+  handling, MFA prompts, and authentication API routes.
+- Restore both presentation hooks when disabled or removed.
+- Add isolated DOM tests for heading updates, MFA preservation, safe text,
+  component text-node identity, observer cleanup, and repeated rendering.
+
 ## 0.1.3
 
 - Add a loading logo width setting from 96 to 800 pixels.

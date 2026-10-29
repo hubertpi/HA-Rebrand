@@ -4,7 +4,7 @@
     "step": {
       "user": {
         "title": "HA Rebrand",
-        "description": "Customize the initial loading screen. Settings apply to new browser loads. The login page stays unchanged. See the README for PNG setup.",
+        "description": "Customize the loading and login screens. Settings apply to new browser loads. See the README for local PNG setup.",
         "data": {
           "enabled": "Enable branding",
           "brand_name": "Brand name",
@@ -12,7 +12,12 @@
           "logo_light": "Light logo filename",
           "logo_dark": "Dark logo filename",
           "favicon": "Favicon filename",
-          "logo_width": "Loading logo width"
+          "logo_width": "Loading logo width",
+          "login_enabled": "Enable login branding",
+          "login_heading": "Login welcome text",
+          "login_logo_light": "Login light logo filename",
+          "login_logo_dark": "Login dark logo filename",
+          "login_logo_width": "Login logo width"
         },
         "data_description": {
           "enabled": "Turn off to restore stock branding after reloading your browser.",
@@ -21,14 +26,20 @@
           "logo_light": "Optional PNG basename in /config/ha_rebrand_local, for example logo.png. Leave blank for the stock logo.",
           "logo_dark": "Optional PNG for the browser or operating system dark color scheme.",
           "favicon": "Optional PNG basename for the browser tab icon.",
-          "logo_width": "Custom logo width in pixels (96 to 800). Defaults to 320; proportions are preserved and small screens scale it down."
+          "logo_width": "Custom logo width in pixels (96 to 800). Defaults to 320; proportions are preserved and small screens scale it down.",
+          "login_enabled": "Customize only the login page logo and welcome heading. Turn off to use the stock login page.",
+          "login_heading": "Defaults to Welcome. Leave blank to keep Home Assistant's English welcome message. Up to 80 printable English characters.",
+          "login_logo_light": "Optional PNG basename in /config/ha_rebrand_local. Leave both login logo fields blank to reuse your loading logos.",
+          "login_logo_dark": "Optional dark-mode login PNG. If you set only one login logo, it is used in both modes.",
+          "login_logo_width": "Width in pixels, from 96 to 800. Defaults to 320; the logo is limited by the login column and viewport."
         }
       }
     },
     "error": {
       "invalid_asset": "Cannot read a valid local PNG. Check the directory and filename. Use a static PNG up to 2 MiB and 2048 pixels per dimension; paths, URLs and symlinks are not allowed.",
       "invalid_name": "Enter 1 to 80 printable English characters without line breaks.",
-      "invalid_width": "Enter a whole number between 96 and 800 pixels."
+      "invalid_width": "Enter a whole number between 96 and 800 pixels.",
+      "invalid_heading": "Enter up to 80 printable English characters without line breaks, or leave blank."
     },
     "abort": {
       "already_configured": "HA Rebrand is already configured."
@@ -38,7 +49,7 @@
     "step": {
       "init": {
         "title": "HA Rebrand",
-        "description": "Customize the initial loading screen. Settings apply to new browser loads. The login page stays unchanged. See the README for PNG setup.",
+        "description": "Customize the loading and login screens. Settings apply to new browser loads. See the README for local PNG setup.",
         "data": {
           "enabled": "Enable branding",
           "brand_name": "Brand name",
@@ -46,7 +57,12 @@
           "logo_light": "Light logo filename",
           "logo_dark": "Dark logo filename",
           "favicon": "Favicon filename",
-          "logo_width": "Loading logo width"
+          "logo_width": "Loading logo width",
+          "login_enabled": "Enable login branding",
+          "login_heading": "Login welcome text",
+          "login_logo_light": "Login light logo filename",
+          "login_logo_dark": "Login dark logo filename",
+          "login_logo_width": "Login logo width"
         },
         "data_description": {
           "enabled": "Turn off to restore stock branding after reloading your browser.",
@@ -55,14 +71,20 @@
           "logo_light": "Optional PNG basename in /config/ha_rebrand_local, for example logo.png. Leave blank for the stock logo.",
           "logo_dark": "Optional PNG for the browser or operating system dark color scheme.",
           "favicon": "Optional PNG basename for the browser tab icon.",
-          "logo_width": "Custom logo width in pixels (96 to 800). Defaults to 320; proportions are preserved and small screens scale it down."
+          "logo_width": "Custom logo width in pixels (96 to 800). Defaults to 320; proportions are preserved and small screens scale it down.",
+          "login_enabled": "Customize only the login page logo and welcome heading. Turn off to use the stock login page.",
+          "login_heading": "Defaults to Welcome. Leave blank to keep Home Assistant's English welcome message. Up to 80 printable English characters.",
+          "login_logo_light": "Optional PNG basename in /config/ha_rebrand_local. Leave both login logo fields blank to reuse your loading logos.",
+          "login_logo_dark": "Optional dark-mode login PNG. If you set only one login logo, it is used in both modes.",
+          "login_logo_width": "Width in pixels, from 96 to 800. Defaults to 320; the logo is limited by the login column and viewport."
         }
       }
     },
     "error": {
       "invalid_asset": "Cannot read a valid local PNG. Check the directory and filename. Use a static PNG up to 2 MiB and 2048 pixels per dimension; paths, URLs and symlinks are not allowed.",
       "invalid_name": "Enter 1 to 80 printable English characters without line breaks.",
-      "invalid_width": "Enter a whole number between 96 and 800 pixels."
+      "invalid_width": "Enter a whole number between 96 and 800 pixels.",
+      "invalid_heading": "Enter up to 80 printable English characters without line breaks, or leave blank."
     }
   }
 }

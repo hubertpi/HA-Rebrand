@@ -32,10 +32,10 @@ asset files or Python source are already trusted HA administrators.
 
 ## Known compatibility risk
 
-The instance template cache is private HA API. A future frontend/Core update can
+The instance template cache and static login route handler slot are private HA APIs. A future frontend/Core update can
 require an integration update. Guards reject changed markers at setup, runtime
 failure falls back to original HTML, and unload restores the previous template.
-See COMPATIBILITY.md for the exact hook and recovery path.
+See COMPATIBILITY.md for both exact hooks and the recovery path.
 
 ## Reporting a problem
 
@@ -43,3 +43,22 @@ Open an issue at https://github.com/hubertpi/HA-Rebrand/issues with versions and
 sanitized logs. Do not post tokens, passwords, full `.storage` files or private
 HA configuration. For a security issue, describe the affected behavior without
 posting working credentials or other private data.
+
+## Login branding boundary
+
+Login branding changes presentation of the existing public static login page.
+It does not introduce an authentication implementation. Its wrapper calls the
+known stock file handler and only adapts that successful login HTML response.
+All stock bootstrap scripts and components remain present. No login flow,
+provider or token API is intercepted, and no form data, token, redirect query,
+credential or cookie is read by the integration.
+
+The configurable heading is JSON serialized with HTML delimiters escaped,
+then applied as text to the existing welcome text node. It never becomes
+markup. MFA prompts, errors and authentication-provider warnings remain stock.
+An isolated DOM test checks attempted script injection and retention of the
+existing nodes. A live aiohttp test checks the frozen router, original route
+object, unchanged synthetic POST payloads to auth APIs, and exact restoration.
+
+These tests validate presentation isolation; they are not a complete end-to-end
+security audit of Home Assistant's authentication system.

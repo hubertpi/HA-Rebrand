@@ -12,7 +12,7 @@ from custom_components.ha_rebrand_local.const import DOMAIN
 
 
 def entry(**options):
-    return SimpleNamespace(options=options)
+    return SimpleNamespace(options={"login_enabled": False, **options})
 
 
 async def test_real_http_setup_unload_and_auth_untouched(harness):

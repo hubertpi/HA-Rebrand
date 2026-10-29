@@ -104,3 +104,32 @@ async def test_initial_flow_persists_numeric_selector_width(harness):
         result = await flow.async_step_user(values)
         assert result["type"] == "create_entry"
         assert result["options"]["logo_width"] == 480
+
+
+async def test_login_heading_validation_has_its_own_error(harness):
+    hass, _, _ = harness
+    assert await validate(hass, {"login_heading": "bad\nheading"}) == {
+        "login_heading": "invalid_heading"
+    }
+
+
+async def test_login_width_validation_has_its_own_error(harness):
+    hass, _, _ = harness
+    assert await validate(hass, {"login_logo_width": 900}) == {"login_logo_width": "invalid_width"}
+
+
+async def test_initial_flow_persists_login_configuration(harness):
+    hass, _, _ = harness
+    flow = RebrandConfigFlow()
+    flow.hass = hass
+    with (
+        patch.object(flow, "async_set_unique_id", new=AsyncMock()),
+        patch.object(flow, "_abort_if_unique_id_configured"),
+    ):
+        result = await flow.async_step_user(
+            {**DEFAULTS, "login_heading": "Please sign in", "login_logo_width": 240}
+        )
+        assert result["type"] == "create_entry"
+        assert result["options"]["login_heading"] == "Please sign in"
+        assert result["options"]["login_logo_width"] == 240
+        assert result["options"]["login_enabled"] is True

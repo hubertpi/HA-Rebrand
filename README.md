@@ -11,10 +11,11 @@ Configure everything through Home Assistant's native integration settings.
 - Use separate light and dark PNG logos.
 - Show or hide the Open Home Foundation loading attribution.
 - Set a custom browser tab title and favicon.
+- Customize the login logo, logo size, and welcome heading independently.
 - Enable or disable branding without editing HA's files.
 - Keep settings and logos through updates and restarts.
 
-No external JavaScript, telemetry, upload service, or custom authentication page.
+No external runtime JavaScript, telemetry, upload service, or changes to credential handling.
 The integration includes its own icon for Home Assistant's integration screen.
 
 ## Requirements
@@ -24,7 +25,7 @@ The integration includes its own icon for Home Assistant's integration screen.
 - HACS for the recommended installation method.
 - Access to your HA configuration directory if you want to add custom PNGs.
 
-The current release is **v0.1.3**. See [release notes](https://github.com/hubertpi/HA-Rebrand/releases)
+The current release is **v0.1.4**. See [release notes](https://github.com/hubertpi/HA-Rebrand/releases)
 and [changelog](CHANGELOG.md). Future HA frontend changes may require an update;
 see [compatibility details](COMPATIBILITY.md).
 
@@ -109,6 +110,31 @@ the integration or saving its options, followed by a browser refresh.
 Dark-mode selection follows the browser/OS color preference during early
 loading; HA's saved theme is not yet available at that point.
 
+## Customize the login screen
+
+Open **Settings > Devices & services > HA Rebrand > Configure**.
+
+- **Enable login branding** turns login customization on or off independently
+  of the loading screen. It is enabled by default.
+- **Login welcome text** defaults to **Welcome**. Enter your preferred heading,
+  or leave it blank to retain HA's English welcome text.
+- **Login light logo filename** and **Login dark logo filename** accept PNG
+  basenames from `/config/ha_rebrand_local`, just like the loading logos.
+  Leave both blank to reuse your loading logos. If you supply only one login
+  logo, it is used in both modes.
+- **Login logo width** defaults to 320 pixels and is configurable from 96 to 800.
+  The rendered size is limited by the login column and the viewport, and image
+  proportions are preserved.
+
+Save and open HA in a private/incognito window, or log out and reload, to see
+these changes. Dark logo selection follows the browser/OS color preference.
+Existing logged-in tabs will show the login page only when authentication is needed.
+
+Only the normal English **Welcome home!** heading is customized. MFA prompts,
+errors, authentication-provider warnings, username/password fields and submission
+buttons keep their stock behavior. The small heading script updates text nodes
+without replacing the form or HA's component elements.
+
 ## Settings
 
 | Option | What it does |
@@ -120,20 +146,24 @@ loading; HA's saved theme is not yet available at that point.
 | Light logo filename | Optional PNG in `/config/ha_rebrand_local`. |
 | Dark logo filename | Optional PNG for a dark browser/OS color scheme. |
 | Favicon filename | Optional PNG for the browser tab. |
+| Enable login branding | Customize login presentation, or use the stock page when disabled. |
+| Login welcome text | Defaults to Welcome; blank keeps HA's English welcome message. |
+| Login light/dark logo filename | Optional independent login PNGs; both blank reuse the loading logos. |
+| Login logo width | 96 to 800 pixels, bounded by the login column and viewport. |
 
 Settings are stored in HA's native config entry. No YAML or separate JSON
 configuration is needed. Code, documentation, and supplied interface text are
 English-only.
 
 The name controls visible loading/tab branding. It does not change the instance
-name in HA's backend settings. The sidebar, login page, onboarding page, installed
-PWA name/icons, mobile app native splash, and theme colors are outside this
+name in HA's backend settings. The sidebar, onboarding page, installed PWA name/icons, mobile app native splash,
+and theme colors are outside this
 integration's scope.
 
 ## Update through HACS
 
 1. Refresh HACS and open **HA Rebrand**.
-2. Install the latest numbered release, for example **v0.1.3**.
+2. Install the latest numbered release, for example **v0.1.4**.
 3. Restart Home Assistant Core.
 4. Hard-refresh open browser tabs. Reload companion app WebViews if used.
 
@@ -148,7 +178,9 @@ never overwritten. Pull requests do not publish releases.
 
 The bundled integration icon is served by HA's native branding system. Some
 older HACS versions still display an upstream placeholder in their own cards,
-even when the icon works in **Settings > Devices & services**. The integration
+even when the icon works in **Settings > Devices & services**. This is tracked
+in [HACS issue #5402](https://github.com/hacs/integration/issues/5402); there is
+no supported per-repository override for that older store view. The integration
 icon is separate from the loading logo and favicon you configure.
 
 ## Disable or uninstall
@@ -163,9 +195,10 @@ To uninstall:
 3. Reload open browser tabs. A loaded document retains its title behavior until refreshed.
 4. Optionally delete `/config/ha_rebrand_local` if you no longer need your images.
 
-Unloading restores the previous index template. HA package files are never
-modified. If another component has replaced the template after HA Rebrand, a
-warning is logged; restart Core to clear the remaining in-memory changes.
+Unloading restores the previous index template and static login-page handler.
+HA package files are never modified. If another component has replaced either
+hook after HA Rebrand, a warning is logged; restart Core to clear the remaining
+in-memory changes.
 
 ## Troubleshooting
 
@@ -187,8 +220,10 @@ files to remove the integration.
 ## Technical details
 
 The adapter wraps one instance's loading template and transforms the finished
-HTML. It restores the previous template on unload. It does not replace login
-routes, change authentication, read tokens, or modify HA package files. PNGs are
+HTML. Login branding wraps the existing static GET `/auth/authorize` handler,
+retaining its route and stock bootstrap scripts. These are private compatibility
+hooks and are restored on unload. Authentication APIs, provider choices, tokens,
+redirects and credential handling are not changed; HA package files are never modified. PNGs are
 validated, stripped of metadata, and embedded in the loading HTML. Your brand
 name and images are public to anyone who can load the index, so do not use
 sensitive content.
@@ -198,7 +233,7 @@ See [security](SECURITY.md), [compatibility](COMPATIBILITY.md),
 
 ## Development and releases
 
-Use Python 3.14 on Linux:
+Use Python 3.14 and Node.js 24 on Linux:
 
 ```bash
 python -m venv .venv
@@ -206,6 +241,8 @@ python -m venv .venv
 .venv/bin/ruff check .
 .venv/bin/ruff format --check .
 .venv/bin/python -m pytest -q
+npm ci --ignore-scripts
+npm test
 ```
 
 To publish a new version, bump `custom_components/ha_rebrand_local/manifest.json`

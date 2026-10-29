@@ -28,6 +28,14 @@ class LogoWidthError(ValueError):
     """The configured loading logo width is outside the supported range."""
 
 
+class LoginHeadingError(ValueError):
+    """The configured login heading is not printable English text."""
+
+
+class LoginWidthError(ValueError):
+    """The configured login logo width is outside the supported range."""
+
+
 @dataclass(frozen=True)
 class Branding:
     """Immutable, validated public branding values."""
@@ -38,6 +46,11 @@ class Branding:
     dark: str | None
     favicon: str | None
     logo_width: int = DEFAULTS["logo_width"]
+    login_enabled: bool = DEFAULTS["login_enabled"]
+    login_heading: str = DEFAULTS["login_heading"]
+    login_light: str | None = None
+    login_dark: str | None = None
+    login_logo_width: int = DEFAULTS["login_logo_width"]
 
 
 def load_branding(config_directory: str, options: dict) -> Branding:
@@ -53,15 +66,49 @@ def load_branding(config_directory: str, options: dict) -> Branding:
         or any(ord(character) < 32 or ord(character) > 126 for character in name)
     ):
         raise ValueError("Brand name must contain 1 to 80 printable English characters")
-    if type(values["enabled"]) is not bool or type(values["hide_foundation"]) is not bool:
+    if any(
+        type(values[key]) is not bool for key in ("enabled", "hide_foundation", "login_enabled")
+    ):
         raise ValueError("Branding toggles must be boolean")
+    light = read_asset(config_directory, values["logo_light"])
+    dark = read_asset(config_directory, values["logo_dark"])
+    heading = values["login_heading"]
+    login_width = values["login_logo_width"]
+    login_light, login_dark = None, None
+    if values["login_enabled"]:
+        if (
+            not isinstance(heading, str)
+            or len(heading) > 80
+            or any(ord(c) < 32 or ord(c) > 126 for c in heading)
+        ):
+            raise LoginHeadingError(
+                "Login heading must contain up to 80 printable English characters"
+            )
+        if (
+            type(login_width) not in (int, float)
+            or not 96 <= login_width <= 800
+            or int(login_width) != login_width
+        ):
+            raise LoginWidthError(
+                "Login logo width must be a whole number between 96 and 800 pixels"
+            )
+        if values["login_logo_light"] or values["login_logo_dark"]:
+            login_light = read_asset(config_directory, values["login_logo_light"])
+            login_dark = read_asset(config_directory, values["login_logo_dark"])
+        else:
+            login_light, login_dark = light, dark
     return Branding(
         name.strip(),
         values["hide_foundation"],
-        read_asset(config_directory, values["logo_light"]),
-        read_asset(config_directory, values["logo_dark"]),
+        light,
+        dark,
         read_asset(config_directory, values["favicon"]),
         int(width),
+        values["login_enabled"],
+        heading.strip() if values["login_enabled"] else "",
+        login_light,
+        login_dark,
+        int(login_width) if values["login_enabled"] else 320,
     )
 
 

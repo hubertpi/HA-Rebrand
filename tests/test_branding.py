@@ -132,7 +132,8 @@ def test_source_files_are_ascii():
     root = Path(__file__).resolve().parents[1]
     for path in root.rglob("*"):
         if path.is_file() and not any(
-            part.startswith(".") or part == "__pycache__" for part in path.relative_to(root).parts
+            part.startswith(".") or part in {"__pycache__", "node_modules"}
+            for part in path.relative_to(root).parts
         ):
             if path.suffix in {".py", ".md", ".json", ".yaml", ".yml", ".toml"}:
                 path.read_text().encode("ascii")

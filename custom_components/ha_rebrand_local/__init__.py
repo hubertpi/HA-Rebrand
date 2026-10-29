@@ -10,6 +10,7 @@ from homeassistant.exceptions import ConfigEntryError
 
 from .branding import BrandedTemplate, CompatibilityError, load_branding, transform_html
 from .const import DEFAULTS, DOMAIN
+from .login import LoginHook, prepare_login_hook
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -21,6 +22,7 @@ class Runtime:
     view: object
     original: object
     branded: BrandedTemplate
+    login: LoginHook | None = None
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
@@ -57,6 +59,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                 original.render(theme_color="#03a9f4", extra_modules=(), extra_js_es5=()), branding
             )
         )
+        login = await prepare_login_hook(hass, branding)
     except (OSError, ValueError) as err:
         raise ConfigEntryError(f"Branding was not applied: {err}") from err
     if view._template_cache is not original:
@@ -64,16 +67,20 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             "Another component changed the index template during setup; branding was not applied"
         )
     branded = BrandedTemplate(original, branding)
+    if login is not None:
+        login.install()
     # Compatibility-sensitive hook: HA 2026.10.4 reads this cache directly.
     # Do not override IndexView methods, change routes, or clear global caches.
     view._template_cache = branded
-    hass.data[DOMAIN] = Runtime(view, original, branded)
+    hass.data[DOMAIN] = Runtime(view, original, branded, login)
     return True
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Restore only the template we own, preserving any later third-party hook."""
     if (runtime := hass.data.pop(DOMAIN, None)) is not None:
+        if runtime.login is not None:
+            runtime.login.restore()
         if runtime.view._template_cache is runtime.branded:
             runtime.view._template_cache = runtime.original
         else:

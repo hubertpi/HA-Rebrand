@@ -6,7 +6,7 @@ from homeassistant.core import callback
 from homeassistant.helpers.selector import NumberSelector, NumberSelectorConfig, NumberSelectorMode
 
 from .assets import AssetError
-from .branding import LogoWidthError, load_branding
+from .branding import LoginHeadingError, LoginWidthError, LogoWidthError, load_branding
 from .const import DEFAULTS, DOMAIN, NAME
 
 
@@ -25,6 +25,15 @@ def schema(values):
             vol.Optional("logo_light", default=values["logo_light"]): str,
             vol.Optional("logo_dark", default=values["logo_dark"]): str,
             vol.Optional("favicon", default=values["favicon"]): str,
+            vol.Required("login_enabled", default=values["login_enabled"]): bool,
+            vol.Optional("login_heading", default=values["login_heading"]): str,
+            vol.Optional("login_logo_light", default=values["login_logo_light"]): str,
+            vol.Optional("login_logo_dark", default=values["login_logo_dark"]): str,
+            vol.Required("login_logo_width", default=values["login_logo_width"]): NumberSelector(
+                NumberSelectorConfig(
+                    min=96, max=800, step=1, mode=NumberSelectorMode.BOX, unit_of_measurement="px"
+                )
+            ),
         }
     )
 
@@ -38,6 +47,10 @@ async def validate(hass, user_input):
         return {"base": "invalid_asset"}
     except LogoWidthError:
         return {"logo_width": "invalid_width"}
+    except LoginWidthError:
+        return {"login_logo_width": "invalid_width"}
+    except LoginHeadingError:
+        return {"login_heading": "invalid_heading"}
     except ValueError:
         return {"brand_name": "invalid_name"}
     return {}

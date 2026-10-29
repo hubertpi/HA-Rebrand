@@ -11,4 +11,9 @@ DEFAULTS = {
     "logo_light": "",
     "logo_dark": "",
     "favicon": "",
+    "login_enabled": True,
+    "login_heading": "Welcome",
+    "login_logo_light": "",
+    "login_logo_dark": "",
+    "login_logo_width": 320,
 }

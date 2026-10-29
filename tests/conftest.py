@@ -3,13 +3,16 @@
 import asyncio
 import io
 import sys
+from functools import partial
 from pathlib import Path
 from types import SimpleNamespace
 
+import hass_frontend
 import pytest
 from aiohttp import web
 from homeassistant.components import frontend
 from homeassistant.components.http import KEY_HASS
+from homeassistant.components.http.server import _serve_file
 from PIL import Image
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
@@ -22,8 +25,7 @@ def png():
     return output.getvalue()
 
 
-@pytest.fixture
-def harness(tmp_path, monkeypatch):
+def make_harness(tmp_path, monkeypatch, real_login=False):
     app = web.Application()
 
     async def executor(function, *args):
@@ -45,7 +47,24 @@ def harness(tmp_path, monkeypatch):
     async def authorize(request):
         return web.Response(text="original authorization route")
 
-    app.router.add_get("/auth/authorize", authorize)
+    if real_login:
+        app.router.add_route(
+            "GET",
+            "/auth/authorize",
+            partial(_serve_file, str(hass_frontend.where() / "authorize.html")),
+        )
+    else:
+        app.router.add_get("/auth/authorize", authorize)
     app.router.register_resource(view)
     monkeypatch.setattr(frontend.onboarding, "async_is_onboarded", lambda _: True)
     return hass, view, app
+
+
+@pytest.fixture
+def harness(tmp_path, monkeypatch):
+    return make_harness(tmp_path, monkeypatch)
+
+
+@pytest.fixture
+def login_harness(tmp_path, monkeypatch):
+    return make_harness(tmp_path, monkeypatch, real_login=True)
