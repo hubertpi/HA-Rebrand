@@ -62,6 +62,15 @@ def transform_login_html(html: str, branding: Branding) -> str:
     match = _LOGIN_LOGO.search(html)
     if match is None:
         raise CompatibilityError("Home Assistant login logo changed")
+    html = re.sub(
+        r"<title>Home Assistant</title>",
+        lambda _: f"<title>{escape(branding.name, quote=True)}</title>",
+        html,
+        count=1,
+        flags=re.IGNORECASE,
+    )
+    # Recompute the logo offset after changing a potentially different-length title.
+    match = _LOGIN_LOGO.search(html)
     light = branding.login_light or branding.login_dark
     if light:
         source = (

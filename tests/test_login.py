@@ -51,7 +51,9 @@ def test_stock_login_script_and_component_preserved():
 
 def test_blank_heading_keeps_stock_text_and_disabled_returns_exact_html():
     original = login_html()
-    assert transform_login_html(original, brand(login_heading="")) == original
+    assert (
+        transform_login_html(original, brand(name="Home Assistant", login_heading="")) == original
+    )
     assert transform_login_html(original, brand(login_enabled=False)) == original
 
 
@@ -217,14 +219,32 @@ async def test_one_favicon_setting_applies_to_both_pages_and_unloads(login_harne
     folder = tmp_path / "ha_rebrand_local"
     folder.mkdir()
     (folder / "favicon.png").write_bytes(png)
-    entry = settings(favicon="favicon.png")
+    entry = settings(favicon="favicon.png", brand_name="Facility Portal")
     async with TestClient(TestServer(app)) as client:
         await async_setup_entry(hass, entry)
         for url in ["/", "/auth/authorize"]:
             html = await (await client.get(url)).text()
             assert '<link rel="icon" type="image/png" href="data:image/png;base64,' in html
             assert 'href="/static/icons/favicon.ico"' not in html
+            assert "<title>Facility Portal</title>" in html
         await async_unload_entry(hass, entry)
         restored = await (await client.get("/auth/authorize")).text()
         assert 'href="/static/icons/favicon.ico"' in restored
         assert "data:image/png;base64," not in restored
+
+
+@pytest.mark.parametrize(
+    "name",
+    ["Facility Portal", "A & B <Portal>", "</title><script>window.compromised=true</script>"],
+)
+def test_login_tab_title_uses_safely_escaped_brand_name(name):
+    import re
+    from html import unescape
+
+    html = transform_login_html(
+        login_html(), brand(name=name, login_light="data:image/png;base64,LOGO")
+    )
+    title = re.search(r"<title>(.*?)</title>", html).group(1)
+    assert unescape(title) == name
+    assert "</title><script>window.compromised=true</script>" not in html
+    assert 'src="data:image/png;base64,LOGO"' in html

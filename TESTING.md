@@ -1,6 +1,6 @@
 # Validation
 
-Release validation result: **103 Python tests and 7 DOM tests passed**. Ruff lint and format checks
+Release validation result: **106 Python tests and 7 DOM tests passed**. Ruff lint and format checks
 also passed. The test run emitted dependency deprecation warnings from aiohttp
 and backoff; no integration test failed. A headless browser could not be
 provisioned in the development environment, so no browser visual test is claimed.
@@ -47,6 +47,8 @@ remote scripts or contacting a production HA instance.
 
 - Native configuration validation and persistence for login heading and width.
 - Shared loading logos, independent login light/dark logos, and disabled login settings.
+- Shared frontend/login brand title, safe title escaping, and unchanged logo
+  placement after title replacement.
 - Shared frontend/login favicon setting, unchanged stock header image when only
   a favicon is configured, and restoration of the original favicon on unload.
 - Preservation of stock authorize HTML scripts and the `ha-authorize` component.

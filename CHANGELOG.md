@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.6
+
+- Apply the configured brand name to the login browser tab title.
+- Escape title text safely and preserve login logo placement after title changes.
+- Keep the stock title when login branding is disabled or removed.
+
 ## 0.1.5
 
 - Apply the configured favicon to the login page as well as the main frontend.

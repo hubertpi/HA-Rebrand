@@ -25,7 +25,7 @@ The integration includes its own icon for Home Assistant's integration screen.
 - HACS for the recommended installation method.
 - Access to your HA configuration directory if you want to add custom PNGs.
 
-The current release is **v0.1.5**. See [release notes](https://github.com/hubertpi/HA-Rebrand/releases)
+The current release is **v0.1.6**. See [release notes](https://github.com/hubertpi/HA-Rebrand/releases)
 and [changelog](CHANGELOG.md). Future HA frontend changes may require an update;
 see [compatibility details](COMPATIBILITY.md).
 
@@ -130,7 +130,8 @@ Save and open HA in a private/incognito window, or log out and reload, to see
 these changes. Dark logo selection follows the browser/OS color preference.
 Existing logged-in tabs will show the login page only when authentication is needed.
 The existing **Favicon filename** setting also applies to the login browser tab
-while login branding is enabled; no separate favicon file is required.
+while login branding is enabled; no separate favicon file is required. The login
+tab title also uses your existing **Brand name** setting.
 
 Only the normal English **Welcome home!** heading is customized. MFA prompts,
 errors, authentication-provider warnings, username/password fields and submission
@@ -142,7 +143,7 @@ without replacing the form or HA's component elements.
 | Option | What it does |
 | --- | --- |
 | Enable branding | Apply branding. Turn off to restore stock HTML on the next browser load. |
-| Brand name | Loading screen text, image alt text, and fixed browser tab title. Use 1 to 80 printable ASCII characters. |
+| Brand name | Loading screen text, image alt text, frontend tab title, and login tab title when login branding is enabled. Use 1 to 80 printable ASCII characters. |
 | Loading logo width | Custom logo width from 96 to 800 pixels; defaults to 320. Proportions are preserved, with viewport limits on small screens. |
 | Hide Open Home Foundation attribution | Hide the loading attribution while retaining its layout space. Enabled by default. |
 | Light logo filename | Optional PNG in `/config/ha_rebrand_local`. |
@@ -165,7 +166,7 @@ integration's scope.
 ## Update through HACS
 
 1. Refresh HACS and open **HA Rebrand**.
-2. Install the latest numbered release, for example **v0.1.5**.
+2. Install the latest numbered release, for example **v0.1.6**.
 3. Restart Home Assistant Core.
 4. Hard-refresh open browser tabs. Reload companion app WebViews if used.
 
