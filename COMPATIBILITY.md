@@ -34,7 +34,7 @@ The adapter checks for `#ha-launch-screen`, the known stock loading image with
 class `ha-logo`, the initial Home Assistant document title, and the following
 `home-assistant` element. Hiding attribution also requires the known `ohf-logo`
 class. It replaces only the matched loading image and initial title, adds a
-name beside the logo, and appends scoped styles in the head.
+name below the logo, and appends scoped styles in the head.
 
 A layout change that removes these markers makes setup fail with a clear error
 before applying branding. If a transformation unexpectedly fails after setup,

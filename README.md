@@ -2,12 +2,12 @@
 
 Local, English-only loading screen branding for Home Assistant.
 
-Change the initial loading logo and displayed brand name, hide the Open Home
+Show the loading logo centered above the displayed brand name, hide the Open Home
 Foundation loading attribution, and optionally change the browser favicon.
 Uses native Home Assistant configuration screens. No remote JavaScript, custom
 admin panel, telemetry, upload service, or authentication-route replacement.
 
-**Version 0.1.0 is an initial development release.** Automated tests use Home
+**Version 0.1.1 is a development release.** Automated tests use Home
 Assistant Core **2026.10.4**, frontend **20260930.5**, and Python **3.14**.
 It still needs a first installation check on your HA instance. Later HA versions
 may require compatibility updates; the minimum version is not a guarantee of

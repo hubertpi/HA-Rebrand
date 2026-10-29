@@ -90,9 +90,8 @@ def transform_html(html: str, branding: Branding) -> str:
     html = _TITLE.sub(lambda _: f"<title>{name}</title>", html, count=1)
     styles = (
         "#ha-launch-screen .ha-logo{object-fit:contain;}"
-        "#ha-launch-screen .ha-lockup{gap:20px;max-width:90vw;}"
+        "#ha-launch-screen .ha-lockup{flex-direction:column;gap:20px;max-width:90vw;text-align:center;}"
         "#ha-rebrand-local-name{font-size:clamp(20px,4vw,36px);overflow-wrap:anywhere;}"
-        "@media(max-width:480px){#ha-launch-screen .ha-lockup{flex-direction:column;}}"
     )
     if branding.hide_foundation:
         styles += "#ha-launch-screen .ohf-logo{visibility:hidden!important;}"
