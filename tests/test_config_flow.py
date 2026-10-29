@@ -85,3 +85,22 @@ async def test_options_can_clear_old_logo(harness):
         result = await flow.async_step_init({**DEFAULTS, "brand_name": "Updated"})
         assert result["data"]["logo_light"] == ""
         assert result["data"]["brand_name"] == "Updated"
+
+
+async def test_width_validation_has_its_own_error(harness):
+    hass, _, _ = harness
+    assert await validate(hass, {"logo_width": 900}) == {"logo_width": "invalid_width"}
+
+
+async def test_initial_flow_persists_numeric_selector_width(harness):
+    hass, _, _ = harness
+    flow = RebrandConfigFlow()
+    flow.hass = hass
+    with (
+        patch.object(flow, "async_set_unique_id", new=AsyncMock()),
+        patch.object(flow, "_abort_if_unique_id_configured"),
+    ):
+        values = schema({**DEFAULTS, "logo_width": 480})({})
+        result = await flow.async_step_user(values)
+        assert result["type"] == "create_entry"
+        assert result["options"]["logo_width"] == 480

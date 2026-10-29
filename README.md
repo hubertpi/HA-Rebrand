@@ -24,7 +24,7 @@ The integration includes its own icon for Home Assistant's integration screen.
 - HACS for the recommended installation method.
 - Access to your HA configuration directory if you want to add custom PNGs.
 
-The current release is **v0.1.2**. See [release notes](https://github.com/hubertpi/HA-Rebrand/releases)
+The current release is **v0.1.3**. See [release notes](https://github.com/hubertpi/HA-Rebrand/releases)
 and [changelog](CHANGELOG.md). Future HA frontend changes may require an update;
 see [compatibility details](COMPATIBILITY.md).
 
@@ -95,8 +95,11 @@ Open **Settings > Devices & services > HA Rebrand > Configure**.
 | Favicon filename | `favicon.png` | Browser tab icon; a square image is recommended. |
 
 Enter **only the filename**, without `/config`, `/local`, a folder, or a URL.
-Save, then hard-refresh the browser. The loading logo fits a 96 by 96 pixel box
-and appears above the centered name. Wide logos retain their proportions.
+Set **Loading logo width** to your preferred size, then save and hard-refresh
+the browser. Custom logos default to **320 pixels wide**, appear above the
+centered name, and keep their original proportions. Choose **96 to 800 pixels**;
+480 is a useful starting point for a wide wordmark. Small screens scale the
+image down automatically. The stock HA logo retains its standard size.
 
 If only one loading logo is supplied, it is used in both modes. If neither is
 supplied, HA's loading logo stays in place. To remove a custom image, clear its
@@ -112,6 +115,7 @@ loading; HA's saved theme is not yet available at that point.
 | --- | --- |
 | Enable branding | Apply branding. Turn off to restore stock HTML on the next browser load. |
 | Brand name | Loading screen text, image alt text, and fixed browser tab title. Use 1 to 80 printable ASCII characters. |
+| Loading logo width | Custom logo width from 96 to 800 pixels; defaults to 320. Proportions are preserved, with viewport limits on small screens. |
 | Hide Open Home Foundation attribution | Hide the loading attribution while retaining its layout space. Enabled by default. |
 | Light logo filename | Optional PNG in `/config/ha_rebrand_local`. |
 | Dark logo filename | Optional PNG for a dark browser/OS color scheme. |
@@ -129,7 +133,7 @@ integration's scope.
 ## Update through HACS
 
 1. Refresh HACS and open **HA Rebrand**.
-2. Install the latest numbered release, for example **v0.1.2**.
+2. Install the latest numbered release, for example **v0.1.3**.
 3. Restart Home Assistant Core.
 4. Hard-refresh open browser tabs. Reload companion app WebViews if used.
 
@@ -169,6 +173,7 @@ warning is logged; restart Core to clear the remaining in-memory changes.
 | --- | --- |
 | Integration is not listed | Confirm `custom_components/ha_rebrand_local/manifest.json` exists, then restart Core. |
 | Image validation fails | Check filename capitalization, directory, PNG content, file size, and dimensions. Enter only a basename. |
+| Logo looks too small | Increase **Loading logo width**. If the PNG has empty transparent margins, crop those margins in an image editor. |
 | Old image or title remains | Save the options or reload the integration, then hard-refresh the browser. |
 | HACS shows a commit hash | Select a published numbered release instead of main. |
 | Integration icon has not appeared | Restart Core and refresh. HA caches brand images; older HACS cards may use their own placeholder. |

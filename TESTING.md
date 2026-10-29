@@ -1,6 +1,6 @@
 # Validation
 
-Release validation result: **65 tests passed**. Ruff lint and format checks
+Release validation result: **77 tests passed**. Ruff lint and format checks
 also passed. The test run emitted dependency deprecation warnings from aiohttp
 and backoff; no integration test failed. A headless browser could not be
 provisioned in the development environment, so no browser visual test is claimed.
@@ -35,6 +35,8 @@ small test harness. These are not full Supervisor or production-instance tests.
 - Native initial/options flows, single-entry behavior, clearing old images,
   disabling despite missing assets, and native automatic reload flow type.
 - ASCII-only project text scan and code formatting/lint checks.
+- Custom logo width bounds and type validation, native numeric selector storage,
+  larger defaults for existing settings, natural image proportions, and viewport limits.
 - Safe release version syntax, matching changelog notes, section boundaries,
   and standard/high-resolution native integration PNG validation.
 

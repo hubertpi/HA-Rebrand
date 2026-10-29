@@ -24,6 +24,10 @@ class CompatibilityError(ValueError):
     """The HA loading template no longer matches the supported structure."""
 
 
+class LogoWidthError(ValueError):
+    """The configured loading logo width is outside the supported range."""
+
+
 @dataclass(frozen=True)
 class Branding:
     """Immutable, validated public branding values."""
@@ -33,11 +37,15 @@ class Branding:
     light: str | None
     dark: str | None
     favicon: str | None
+    logo_width: int = DEFAULTS["logo_width"]
 
 
 def load_branding(config_directory: str, options: dict) -> Branding:
     """Validate settings and load assets in an executor."""
     values = {**DEFAULTS, **options}
+    width = values["logo_width"]
+    if type(width) not in (int, float) or not 96 <= width <= 800 or int(width) != width:
+        raise LogoWidthError("Logo width must be a whole number between 96 and 800 pixels")
     name = values["brand_name"]
     if (
         not isinstance(name, str)
@@ -53,6 +61,7 @@ def load_branding(config_directory: str, options: dict) -> Branding:
         read_asset(config_directory, values["logo_light"]),
         read_asset(config_directory, values["logo_dark"]),
         read_asset(config_directory, values["favicon"]),
+        int(width),
     )
 
 
@@ -80,7 +89,7 @@ def transform_html(html: str, branding: Branding) -> str:
         )
         replacement = (
             f'<picture id="ha-rebrand-local-logo">{source}'
-            f'<img class="ha-logo" src="{light}" alt="{name}" width="96" height="96"></picture>'
+            f'<img class="ha-logo" src="{light}" alt="{name}"></picture>'
         )
     else:
         replacement = replacement.replace('alt="Home Assistant"', f'alt="{name}"')
@@ -93,6 +102,12 @@ def transform_html(html: str, branding: Branding) -> str:
         "#ha-launch-screen .ha-lockup{flex-direction:column;gap:20px;max-width:90vw;text-align:center;}"
         "#ha-rebrand-local-name{font-size:clamp(20px,4vw,36px);overflow-wrap:anywhere;}"
     )
+    if light:
+        styles += (
+            "#ha-rebrand-local-logo{display:flex;justify-content:center;max-width:80vw;}"
+            f"#ha-launch-screen #ha-rebrand-local-logo .ha-logo{{width:{branding.logo_width}px;"
+            "height:auto;max-width:80vw;max-height:40vh;display:block;}"
+        )
     if branding.hide_foundation:
         styles += "#ha-launch-screen .ohf-logo{visibility:hidden!important;}"
     additions = f'<style id="ha-rebrand-local-style">{styles}</style>'

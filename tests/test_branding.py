@@ -136,3 +136,27 @@ def test_source_files_are_ascii():
         ):
             if path.suffix in {".py", ".md", ".json", ".yaml", ".yml", ".toml"}:
                 path.read_text().encode("ascii")
+
+
+@pytest.mark.parametrize("width", [95, 801, "320", True, 320.5, float("nan"), float("inf"), None])
+def test_invalid_logo_width_is_rejected(tmp_path, width):
+    from custom_components.ha_rebrand_local.branding import LogoWidthError
+
+    with pytest.raises(LogoWidthError):
+        load_branding(str(tmp_path), {"logo_width": width})
+
+
+def test_existing_options_receive_larger_default_without_migration(tmp_path):
+    branding = load_branding(str(tmp_path), {"brand_name": "Facility Control"})
+    assert branding.logo_width == 320
+
+
+def test_custom_logo_keeps_intrinsic_aspect_and_respects_selected_width(html):
+    result = transform_html(html, brand(light="data:image/png;base64,LOGO", logo_width=480))
+    assert "width:480px;height:auto;max-width:80vw;max-height:40vh;" in result
+    image = re.search(
+        r'<img class="ha-logo" src="data:image/png;base64,LOGO"[^>]*>', result
+    ).group()
+    assert 'height="96"' not in image
+    assert 'width="96"' not in image
+    assert "flex-direction:column;" in result

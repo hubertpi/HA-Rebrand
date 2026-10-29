@@ -11,7 +11,8 @@
           "hide_foundation": "Hide Open Home Foundation attribution",
           "logo_light": "Light logo filename",
           "logo_dark": "Dark logo filename",
-          "favicon": "Favicon filename"
+          "favicon": "Favicon filename",
+          "logo_width": "Loading logo width"
         },
         "data_description": {
           "enabled": "Turn off to restore stock branding after reloading your browser.",
@@ -19,13 +20,15 @@
           "hide_foundation": "Hide the foundation logo and attribution on the initial loading screen.",
           "logo_light": "Optional PNG basename in /config/ha_rebrand_local, for example logo.png. Leave blank for the stock logo.",
           "logo_dark": "Optional PNG for the browser or operating system dark color scheme.",
-          "favicon": "Optional PNG basename for the browser tab icon."
+          "favicon": "Optional PNG basename for the browser tab icon.",
+          "logo_width": "Custom logo width in pixels (96 to 800). Defaults to 320; proportions are preserved and small screens scale it down."
         }
       }
     },
     "error": {
       "invalid_asset": "Cannot read a valid local PNG. Check the directory and filename. Use a static PNG up to 2 MiB and 2048 pixels per dimension; paths, URLs and symlinks are not allowed.",
-      "invalid_name": "Enter 1 to 80 printable English characters without line breaks."
+      "invalid_name": "Enter 1 to 80 printable English characters without line breaks.",
+      "invalid_width": "Enter a whole number between 96 and 800 pixels."
     },
     "abort": {
       "already_configured": "HA Rebrand is already configured."
@@ -42,7 +45,8 @@
           "hide_foundation": "Hide Open Home Foundation attribution",
           "logo_light": "Light logo filename",
           "logo_dark": "Dark logo filename",
-          "favicon": "Favicon filename"
+          "favicon": "Favicon filename",
+          "logo_width": "Loading logo width"
         },
         "data_description": {
           "enabled": "Turn off to restore stock branding after reloading your browser.",
@@ -50,13 +54,15 @@
           "hide_foundation": "Hide the foundation logo and attribution on the initial loading screen.",
           "logo_light": "Optional PNG basename in /config/ha_rebrand_local, for example logo.png. Leave blank for the stock logo.",
           "logo_dark": "Optional PNG for the browser or operating system dark color scheme.",
-          "favicon": "Optional PNG basename for the browser tab icon."
+          "favicon": "Optional PNG basename for the browser tab icon.",
+          "logo_width": "Custom logo width in pixels (96 to 800). Defaults to 320; proportions are preserved and small screens scale it down."
         }
       }
     },
     "error": {
       "invalid_asset": "Cannot read a valid local PNG. Check the directory and filename. Use a static PNG up to 2 MiB and 2048 pixels per dimension; paths, URLs and symlinks are not allowed.",
-      "invalid_name": "Enter 1 to 80 printable English characters without line breaks."
+      "invalid_name": "Enter 1 to 80 printable English characters without line breaks.",
+      "invalid_width": "Enter a whole number between 96 and 800 pixels."
     }
   }
 }

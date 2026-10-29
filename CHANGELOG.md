@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.3
+
+- Add a loading logo width setting from 96 to 800 pixels.
+- Increase custom logos to a 320-pixel default width, preserving their natural
+  proportions instead of fitting wide wordmarks into a 96 by 96 pixel box.
+- Scale logos down on small screens and keep them above the centered name.
+- Apply the larger default to existing settings without a migration.
+
 ## 0.1.2
 
 - Add a dedicated HA Rebrand icon with standard and high-resolution PNGs for

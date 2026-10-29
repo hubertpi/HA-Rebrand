@@ -3,9 +3,10 @@
 import probatio as vol
 from homeassistant.config_entries import ConfigFlow, OptionsFlowWithReload
 from homeassistant.core import callback
+from homeassistant.helpers.selector import NumberSelector, NumberSelectorConfig, NumberSelectorMode
 
 from .assets import AssetError
-from .branding import load_branding
+from .branding import LogoWidthError, load_branding
 from .const import DEFAULTS, DOMAIN, NAME
 
 
@@ -15,6 +16,11 @@ def schema(values):
         {
             vol.Required("enabled", default=values["enabled"]): bool,
             vol.Required("brand_name", default=values["brand_name"]): str,
+            vol.Required("logo_width", default=values["logo_width"]): NumberSelector(
+                NumberSelectorConfig(
+                    min=96, max=800, step=1, mode=NumberSelectorMode.BOX, unit_of_measurement="px"
+                )
+            ),
             vol.Required("hide_foundation", default=values["hide_foundation"]): bool,
             vol.Optional("logo_light", default=values["logo_light"]): str,
             vol.Optional("logo_dark", default=values["logo_dark"]): str,
@@ -30,6 +36,8 @@ async def validate(hass, user_input):
             await hass.async_add_executor_job(load_branding, hass.config.config_dir, user_input)
     except AssetError:
         return {"base": "invalid_asset"}
+    except LogoWidthError:
+        return {"logo_width": "invalid_width"}
     except ValueError:
         return {"brand_name": "invalid_name"}
     return {}
