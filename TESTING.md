@@ -1,6 +1,6 @@
 # Validation
 
-Current validation result: **138 Python tests and 7 DOM tests passed**. Ruff lint and format checks
+Current validation result: **141 Python tests and 8 DOM tests passed**. Ruff lint and format checks
 also passed. The test run emitted dependency deprecation warnings from aiohttp
 and backoff; no integration test failed. A headless browser could not be
 provisioned in the development environment, so no browser visual test is claimed.
@@ -139,3 +139,36 @@ Using the reported source PNG, both 0.1.8 installation icons lost all pixels wit
 an RGB channel below 200 when composited onto white. The 0.1.10 icons retained
 contrasting pixels in every advertised size and purpose. This reproduces an
 asset-level failure, not a verified rendering of the user's installed APK.
+
+
+## Notification interruption review (2026-11-08)
+
+Additional resilience checks passed with real Core HTML5 payload construction
+and mocked outbound push:
+
+- 250 concurrent sends complete without a shared lock or reordered image URLs.
+- A failed push is followed successfully by another send through the same hook.
+- A held network push does not prevent a second send completing independently.
+- The generated frontend title observer settles after 100 dashboard title
+  updates; the test does not include other integrations' scripts.
+
+The wrapper does not change snapshot URLs, TTL, urgency, registrations, signing,
+service-worker source, or snapshot HTTP cache headers. No server-side deadlock
+or self-sustaining title-observer loop was reproduced. These checks do not
+establish that Chrome/Android notification delivery cannot stall.
+
+A remaining browser-side risk is the added network dependency for the generated
+notification icon and badge PNG URLs. Chromium loads notification image, icon
+and badge resources before displaying the notification, with a 90-second image
+fetch timeout in the reviewed current source. Slow/unreachable branding URLs
+could therefore delay even a notification without a doorbell photograph.
+This is a plausible display-delay mechanism, not confirmation of the reported
+persistent interruption or proof that it freezes the entire web app.
+
+Sources reviewed:
+- https://github.com/chromium/chromium/blob/main/third_party/blink/renderer/modules/notifications/notification_resources_loader.cc
+- https://github.com/chromium/chromium/blob/main/third_party/blink/renderer/modules/notifications/service_worker_registration_notifications.cc
+
+This review adds tests and documentation only; it does not change the 0.1.12
+runtime or publish a speculative runtime fix. A controlled test with Rebrand
+disabled and Core restarted is needed to isolate its effect on the phone.

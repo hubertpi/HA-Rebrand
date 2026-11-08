@@ -8,8 +8,10 @@ from types import SimpleNamespace
 from unittest.mock import AsyncMock, Mock
 
 import pytest
+from aiohttp import ClientConnectionError
 from aiohttp.test_utils import TestClient, TestServer
 from homeassistant.components.html5 import notify as html5
+from homeassistant.exceptions import HomeAssistantError
 from PIL import Image, ImageDraw
 
 from custom_components.ha_rebrand_local import async_setup_entry, async_unload_entry
@@ -266,3 +268,77 @@ async def test_unfamiliar_platform_does_not_change_defaults(hook, monkeypatch):
     await hook.start()
     assert (html5.DEFAULT_ICON, html5.DEFAULT_BADGE) == original
     assert hook.module is None
+
+
+async def test_failed_native_push_does_not_disable_or_block_later_notifications(hook, monkeypatch):
+    response = SimpleNamespace(raise_for_status=lambda: None)
+    push = AsyncMock(side_effect=[ClientConnectionError("Simulated push failure"), response])
+    monkeypatch.setattr(html5, "webpush_async", push)
+    monkeypatch.setattr(html5, "add_jwt", lambda *args: "test-jwt")
+    await hook.start()
+    entity = make_entity(hook.hass)
+    with pytest.raises(HomeAssistantError):
+        await entity.send_push_notification(message="First")
+    async with asyncio.timeout(2):
+        await entity.send_push_notification(message="Second")
+    assert push.await_count == 2
+    assert json.loads(push.await_args.args[1])["body"] == "Second"
+    assert hook.active
+
+
+async def test_concurrent_notifications_do_not_share_a_lock_or_mutate_image_urls(hook, monkeypatch):
+    payloads = []
+    active = peak = 0
+
+    async def push(subscription, data, *args, **kwargs):
+        nonlocal active, peak
+        active += 1
+        peak = max(peak, active)
+        payloads.append(json.loads(data))
+        await asyncio.sleep(0)
+        active -= 1
+        return SimpleNamespace(raise_for_status=lambda: None)
+
+    monkeypatch.setattr(html5, "webpush_async", push)
+    monkeypatch.setattr(html5, "add_jwt", lambda *args: "test-jwt")
+    await hook.start()
+    entity = make_entity(hook.hass)
+    async with asyncio.timeout(3):
+        await asyncio.gather(
+            *(
+                entity.send_push_notification(
+                    message=f"Doorbell {i}", image=f"/local/doorbell_snapshot.jpg?v={i}"
+                )
+                for i in range(250)
+            )
+        )
+    assert len(payloads) == 250
+    assert peak > 1
+    for i, payload in enumerate(payloads):
+        assert payload["body"] == f"Doorbell {i}"
+        assert payload["image"] == f"/local/doorbell_snapshot.jpg?v={i}"
+        assert payload["icon"] == hook.defaults["icon"]
+
+
+async def test_one_slow_push_does_not_hold_up_the_next(hook, monkeypatch):
+    entered, release = asyncio.Event(), asyncio.Event()
+
+    async def push(subscription, data, *args, **kwargs):
+        if json.loads(data)["body"] == "Slow":
+            entered.set()
+            await release.wait()
+        return SimpleNamespace(raise_for_status=lambda: None)
+
+    monkeypatch.setattr(html5, "webpush_async", push)
+    monkeypatch.setattr(html5, "add_jwt", lambda *args: "test-jwt")
+    await hook.start()
+    entity = make_entity(hook.hass)
+    slow = asyncio.create_task(entity.send_push_notification(message="Slow"))
+    try:
+        async with asyncio.timeout(2):
+            await entered.wait()
+            await entity.send_push_notification(message="Next")
+        assert not slow.done()
+    finally:
+        release.set()
+        await slow

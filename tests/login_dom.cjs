@@ -6,6 +6,38 @@ const {JSDOM} = require('jsdom');
 const fixtures = JSON.parse(execFileSync(process.env.PYTHON || 'python', ['scripts/login_test_fixtures.py'], {encoding:'utf8'}));
 const settle = () => new Promise(resolve => setTimeout(resolve, 0));
 
+test('frontend title observer settles after repeated dashboard title updates', async () => {
+  const dom = new JSDOM('<head><title>Home Assistant</title></head>', {runScripts:'outside-only'});
+  const NativeObserver = dom.window.MutationObserver;
+  let callbacks = 0;
+  dom.window.MutationObserver = class extends NativeObserver {
+    constructor(callback) {
+      super((records, observer) => {
+        if (++callbacks > 400) {
+          observer.disconnect();
+          assert.fail('Title observer did not settle');
+        }
+        callback(records, observer);
+      });
+    }
+  };
+  try {
+    dom.window.eval(fixtures.titleScript);
+    for (let i=0; i<100; i++) {
+      dom.window.document.title = `Dashboard ${i}`;
+      await settle();
+      assert.equal(dom.window.document.title, 'Facility');
+    }
+    const count = callbacks;
+    await settle();
+    await settle();
+    assert.equal(callbacks, count);
+    assert.ok(callbacks <= 300);
+  } finally {
+    dom.window.close();
+  }
+});
+
 function page(heading='Welcome', text='Welcome home!') {
   const dom = new JSDOM('<ha-authorize><ha-auth-flow><form><h1><!--lit--></h1><input name="username"><input type="password"><button>Submit</button></form></ha-auth-flow></ha-authorize>', {runScripts:'outside-only'});
   dom.window.document.querySelector('h1').appendChild(dom.window.document.createTextNode(text));
