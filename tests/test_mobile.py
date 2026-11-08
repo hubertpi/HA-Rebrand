@@ -214,3 +214,46 @@ async def test_live_manifest_icons_favicon_and_full_cleanup(login_harness, tmp_p
         assert frontend.MANIFEST_JSON.manifest == original
         assert (await client.get(manifest["icons"][0]["src"])).status == 404
         assert (await (await client.get("/manifest.json")).json()) == original
+
+
+async def test_installer_fetches_opaque_contrasting_icons_for_white_artwork(
+    login_harness, tmp_path
+):
+    """Check install metadata and every public icon, not just the Pillow helper."""
+    hass, _, app = login_harness
+    source = Image.new("RGBA", (128, 128))
+    ImageDraw.Draw(source).ellipse((24, 24, 104, 104), fill="white")
+    folder = tmp_path / "ha_rebrand_local"
+    folder.mkdir()
+    source.save(folder / "white.png")
+    entry = SimpleNamespace(options={"pwa_icon": "white.png", "favicon": "white.png"})
+    async with TestClient(TestServer(app)) as client:
+        await async_setup_entry(hass, entry)
+        try:
+            manifest = await (await client.get("/manifest.json")).json()
+            assert {icon["purpose"] for icon in manifest["icons"]} == {"any", "maskable"}
+            for icon in manifest["icons"]:
+                response = await client.get(icon["src"])
+                assert response.status == 200
+                raw = await response.read()
+                assert icon["src"].endswith(sha256(raw).hexdigest() + ".png")
+                with Image.open(io.BytesIO(raw)) as image:
+                    # Chrome's packaged adaptive icon has a white backing. The
+                    # supplied installation PNG must already be opaque and have
+                    # contrasting artwork before Chrome packages it.
+                    assert image.getchannel("A").getextrema() == (255, 255)
+                    flattened = Image.new("RGBA", image.size, "white")
+                    flattened.alpha_composite(image)
+                    assert flattened.getpixel((0, 0)) == (32, 49, 59, 255)
+                    assert flattened.getpixel((image.width // 2, image.height // 2)) == (
+                        255,
+                        255,
+                        255,
+                        255,
+                    )
+            favicon_url = hass.data[DOMAIN].mobile.favicon_url
+            response = await client.get(favicon_url)
+            with Image.open(io.BytesIO(await response.read())) as favicon:
+                assert favicon.getpixel((0, 0))[3] == 0
+        finally:
+            await async_unload_entry(hass, entry)

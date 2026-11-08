@@ -1,6 +1,6 @@
 # Validation
 
-Release validation result: **135 Python tests and 7 DOM tests passed**. Ruff lint and format checks
+Current validation result: **136 Python tests and 7 DOM tests passed**. Ruff lint and format checks
 also passed. The test run emitted dependency deprecation warnings from aiohttp
 and backoff; no integration test failed. A headless browser could not be
 provisioned in the development environment, so no browser visual test is claimed.
@@ -126,3 +126,19 @@ white artwork: the old icon flattened to an almost-white square; the new app
 icons have an opaque dark background. Automated checks cover contrast, alpha,
 maskable safe-zone containment and unchanged favicon/badge transparency. Actual
 Samsung notification rendering and installed-icon refresh remain device checks.
+
+A post-release HTTP test loads a transparent white source through the integration,
+fetches the native `/manifest.json`, then fetches every advertised installation
+PNG. It verifies opaque alpha, dark backing, white artwork and content-addressed
+URLs for both ordinary and maskable icons. The favicon remains transparent.
+The runtime correction is already in 0.1.10; this test adds coverage without a
+new runtime release.
+
+Chrome's WebAPK adaptive-icon resource uses a white background behind the
+maskable artwork:
+https://github.com/chromium/chromium/blob/main/chrome/android/webapk/shell_apk/res/mipmap-anydpi-v26/ic_launcher.xml
+
+Using the reported source PNG, both 0.1.8 installation icons lost all pixels with
+an RGB channel below 200 when composited onto white. The 0.1.10 icons retained
+contrasting pixels in every advertised size and purpose. This reproduces an
+asset-level failure, not a verified rendering of the user's installed APK.
