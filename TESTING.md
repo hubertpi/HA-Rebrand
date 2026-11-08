@@ -1,6 +1,6 @@
 # Validation
 
-Current validation result: **124 Python tests and 7 DOM tests passed**. Ruff lint and format checks
+Current validation result: **138 Python tests and 7 DOM tests passed**. Ruff lint and format checks
 also passed. The test run emitted dependency deprecation warnings from aiohttp
 and backoff; no integration test failed. A headless browser could not be
 provisioned in the development environment, so no browser visual test is claimed.
@@ -79,13 +79,21 @@ Browser login/MFA should also be verified on the target HA instance.
 These are server/DOM tests; they do not simulate Android's OS splash or Chrome's
 installed-web-app update schedule. Those need testing on the target device.
 
-## HTML5 notification isolation
+## HTML5 secondary-image suppression
 
-- Setup and unload leave an already-loaded HTML5 notify platform's defaults and
-  entity methods unchanged.
-- Branding does not import the notify platform or register component-loaded
-  listeners, whether HTML5 is already loaded or absent.
-- Installed-app, favicon and login branding remain covered separately.
+- Actual Core 2026.10.4 legacy, generic and HTML5-specific payload builders with
+  outbound push mocked. Missing icons use the transparent default.
+- Explicit icons, badges, pictures, action buttons, click URLs and dismiss calls
+  are preserved. With no favicon, the badge default is unchanged. With a favicon,
+  all three native send paths receive the generated white silhouette. Transparent
+  cutouts and flat-background removal are checked separately.
+- Public PNG decodes as 96 by 96 with zero alpha for every pixel. Unload returns
+  404 for its URL.
+- HTML5 loading after Rebrand, import/unload races, repeated reloads, setup
+  failure/cancellation and unfamiliar-helper compatibility checks.
+- Installed-app icon, favicon and login tests remain separate.
+- Real Android rendering and any space reserved for the transparent image remain
+  device checks. No notification visual result is claimed from Python tests.
 
 ## Browser validation checklist
 

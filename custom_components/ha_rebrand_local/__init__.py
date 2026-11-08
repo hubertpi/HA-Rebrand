@@ -1,5 +1,6 @@
 """HA Rebrand: local loading screen branding with reversible cleanup."""
 
+import asyncio
 import logging
 from dataclasses import dataclass
 
@@ -19,6 +20,7 @@ from .mobile import (
     prepare_mobile_assets,
     with_mobile_urls,
 )
+from .notifications import NotificationBranding
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -33,6 +35,7 @@ class Runtime:
     login: LoginHook | None = None
     mobile: MobileAssets | None = None
     manifest: ManifestBranding | None = None
+    notifications: NotificationBranding | None = None
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
@@ -88,13 +91,21 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     # Compatibility-sensitive hook: HA 2026.10.4 reads this cache directly.
     # Do not override IndexView methods, change routes, or clear global caches.
     view._template_cache = branded
-    hass.data[DOMAIN] = Runtime(view, original, branded, login, mobile, manifest)
+    notifications = NotificationBranding(hass, mobile)
+    hass.data[DOMAIN] = Runtime(view, original, branded, login, mobile, manifest, notifications)
+    try:
+        await notifications.start()
+    except Exception, asyncio.CancelledError:
+        await async_unload_entry(hass, entry)
+        raise
     return True
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Restore only the template we own, preserving any later third-party hook."""
     if (runtime := hass.data.pop(DOMAIN, None)) is not None:
+        if runtime.notifications is not None:
+            runtime.notifications.restore()
         if runtime.manifest is not None:
             runtime.manifest.restore()
         if runtime.login is not None:

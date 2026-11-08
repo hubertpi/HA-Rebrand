@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.1.12
+
+- Suppress HTML5 notifications' default secondary icon using a transparent PNG,
+  preventing Chrome's origin-letter fallback when no icon is supplied.
+- Preserve explicit notification icons, pictures, actions, URLs and badges.
+- Use the configured favicon as a white status-bar badge with transparent
+  cutouts; preserve the working installed-app branding.
+- Restore owned notification defaults and hooks on disable or removal.
+
 ## 0.1.11
 
 - Remove all HTML5 notification overrides and badge generation added in 0.1.8.

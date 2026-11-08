@@ -79,11 +79,22 @@ The supported loading logo is an image referencing
 
 ## HTML5 notification artwork
 
-HA Rebrand does not import or patch the HTML5 notify platform, change its
-constants, wrap notification helpers, or listen for HTML5 setup. Notification
-payloads and delivery use Home Assistant's stock implementation. Installed web
-app metadata remains independently branded through the frontend manifest.
-Restart Core after upgrading from 0.1.8-0.1.10 to clear those versions' hooks.
+HA Rebrand waits for HTML5 to load, then imports its notify platform through
+HA's integration loader. It changes only `DEFAULT_ICON` to a public transparent
+PNG URL, and fills a missing `icon` argument on `HTML5NotifyEntity._webpush` for
+this HA instance. When a favicon is configured, it also replaces `DEFAULT_BADGE`
+and fills a missing `badge` keyword with a white silhouette generated from that
+favicon. No favicon leaves HA's badge default intact. Legacy and generic actions
+read module defaults; the HTML5-specific action uses the wrapper.
+Explicit icons, pictures and other payload fields pass through unchanged.
+
+These are compatibility-sensitive in-memory hooks. An unfamiliar helper is
+logged and left intact. Unload cancels pending listeners, guards against late
+imports, restores only owned defaults/methods and leaves later owners intact.
+Push signing, credentials, recipients and network delivery remain with HA.
+The transparent PNG decodes as a nonempty bitmap, bypassing Chrome's generated
+origin-initial fallback. Android may still reserve the image's layout space;
+actual phone rendering is a device check.
 
 ## Cleanup and concurrent customization
 

@@ -10,7 +10,7 @@ from hashlib import sha256
 from aiohttp import web
 from homeassistant.components import frontend
 from homeassistant.components.http import HomeAssistantView
-from PIL import Image, ImageOps, ImageStat
+from PIL import Image, ImageChops, ImageOps, ImageStat
 
 from .branding import Branding
 from .const import DOMAIN
@@ -28,6 +28,8 @@ class MobileAssets:
     icons: list[dict] | None
     favicon_url: str | None
     touch_url: str | None
+    notification_icon_url: str
+    notification_badge_url: str | None = None
 
 
 def prepare_mobile_assets(branding: Branding) -> MobileAssets:
@@ -42,10 +44,12 @@ def prepare_mobile_assets(branding: Branding) -> MobileAssets:
         files[filename] = content
         return ICON_PATH + filename
 
-    def icon(data_uri, size, app=False, maskable=False):
+    def icon(data_uri, size, app=False, maskable=False, badge=False):
         data = base64.b64decode(data_uri.split(",", 1)[1], validate=True)
         with Image.open(io.BytesIO(data)) as image:
             pixels = image.convert("RGBA")
+            if badge:
+                pixels = notification_badge(pixels)
             scaled = ImageOps.contain(pixels, (size, size), Image.Resampling.LANCZOS)
             canvas = Image.new("RGBA", (size, size))
             canvas.alpha_composite(
@@ -80,7 +84,13 @@ def prepare_mobile_assets(branding: Branding) -> MobileAssets:
         touch_url = icon(source, 180, app=True)
     elif branding.favicon:
         touch_url = icon(branding.favicon, 180, app=True)
-    return MobileAssets(files, icons, favicon_url, touch_url)
+    # A missing/empty icon makes Chrome generate a visible origin initial.
+    # Supply a valid transparent PNG instead, separate from all branding art.
+    notification_icon_url = save(Image.new("RGBA", (96, 96)))
+    notification_badge_url = icon(branding.favicon, 96, badge=True) if branding.favicon else None
+    return MobileAssets(
+        files, icons, favicon_url, touch_url, notification_icon_url, notification_badge_url
+    )
 
 
 def app_icon(image: Image.Image, size: int, *, maskable: bool = False) -> Image.Image:
@@ -102,6 +112,23 @@ def app_icon(image: Image.Image, size: int, *, maskable: bool = False) -> Image.
     scaled = ImageOps.contain(image, (limit, limit), Image.Resampling.LANCZOS)
     canvas.alpha_composite(scaled, ((size - scaled.width) // 2, (size - scaled.height) // 2))
     return canvas
+
+
+def notification_badge(image: Image.Image) -> Image.Image:
+    """Make a white Android silhouette, keeping existing transparent cutouts."""
+    alpha = image.getchannel("A")
+    if alpha.getextrema() == (255, 255):
+        # An opaque background becomes a solid square in Android's status bar.
+        # Infer a flat background from the top-left pixel. Color distance also
+        # handles white logos on dark backgrounds and dark logos on white ones.
+        rgb = image.convert("RGB")
+        background = Image.new("RGB", image.size, rgb.getpixel((0, 0)))
+        red, green, blue = ImageChops.difference(rgb, background).split()
+        alpha = ImageChops.lighter(ImageChops.lighter(red, green), blue)
+        alpha = alpha.point(lambda value: min(255, max(0, (value - 16) * 4)))
+    result = Image.new("RGBA", image.size, "white")
+    result.putalpha(alpha)
+    return result
 
 
 def with_mobile_urls(branding: Branding, assets: MobileAssets) -> Branding:
