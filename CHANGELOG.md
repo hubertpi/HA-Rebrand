@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.11
+
+- Remove all HTML5 notification overrides and badge generation added in 0.1.8.
+- Restore Home Assistant's own notification defaults and payload handling.
+- Preserve the working installed-app icon generation from 0.1.10.
+- Restart Home Assistant after updating to clear the previous in-memory hooks.
+
 ## 0.1.10
 
 - Give installed app and Apple touch icons an opaque contrasting background so

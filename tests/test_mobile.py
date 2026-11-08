@@ -92,13 +92,13 @@ def test_maskable_entire_artwork_fits_safe_circle():
                 assert (x - 255.5) ** 2 + (y - 255.5) ** 2 <= (512 * 0.4) ** 2
 
 
-def test_app_backing_does_not_flatten_favicon_or_badge():
+def test_app_backing_does_not_flatten_favicon():
     source = Image.new("RGBA", (64, 64))
     ImageDraw.Draw(source).ellipse((16, 16, 48, 48), fill="white")
     output = io.BytesIO()
     source.save(output, format="PNG")
     assets = prepare_mobile_assets(brand(output.getvalue()))
-    for url in (assets.favicon_url, assets.notification_badge_url):
+    for url in (assets.favicon_url,):
         with Image.open(io.BytesIO(assets.files[url.split("/")[-1]])) as image:
             assert image.getpixel((0, 0))[3] == 0
     for url in [item["src"] for item in assets.icons] + [assets.touch_url]:
@@ -131,7 +131,7 @@ def test_loading_logo_fallback_and_pwa_disabled(png):
     assert prepare_mobile_assets(settings).icons is not None
     disabled = prepare_mobile_assets(replace(settings, pwa_enabled=False))
     assert disabled.icons is None
-    assert disabled.notification_badge_url is not None
+    assert disabled.favicon_url is None
 
 
 def test_manifest_restoration_preserves_identity_and_unrelated_fields(harness, png):

@@ -79,23 +79,11 @@ The supported loading logo is an image referencing
 
 ## HTML5 notification artwork
 
-HTML5 notification branding was checked against Core `2026.10.4` and the
-`2026.11.0` notification source. The integration waits for HTML5 to load and
-imports its notify platform through HA's native integration loader. It does not
-enable HTML5 or install push dependencies when HTML5 is absent.
-
-Legacy notifications and generic notify actions read the module's `DEFAULT_BADGE`
-value at send time. HA Rebrand replaces that presentation
-default in memory. For `html5.send_message`, a reversible wrapper around
-`HTML5NotifyEntity._webpush` fills the missing badge keyword for this HA instance
-before delegating to the original method. Explicit values and dismiss calls are
-preserved. Notification bodies, actions, recipients, signing, credentials and
-delivery remain with the original HTML5 implementation.
-
-The defaults and private helper are compatibility-sensitive. An unfamiliar
-helper is logged and left intact. Unload cancels pending setup listeners,
-prevents late imports from installing hooks, restores owned defaults/methods,
-and preserves later third-party changes. A retained wrapper becomes inactive.
+HA Rebrand does not import or patch the HTML5 notify platform, change its
+constants, wrap notification helpers, or listen for HTML5 setup. Notification
+payloads and delivery use Home Assistant's stock implementation. Installed web
+app metadata remains independently branded through the frontend manifest.
+Restart Core after upgrading from 0.1.8-0.1.10 to clear those versions' hooks.
 
 ## Cleanup and concurrent customization
 
@@ -128,7 +116,7 @@ separate 512 pixel purpose-maskable icon. Transparent light artwork is composite
 on dark slate; dark artwork uses light gray. The maskable artwork fits within
 the central 40%-radius safe circle. This prevents white artwork disappearing
 when Android otherwise flattens transparent app icons onto white. The app-icon
-background is separate from the transparent favicon and notification badge.
+background is separate from the transparent favicon.
 Browser favicons use 64 pixel PNG URLs and touch icons use 180 pixel PNG URLs.
 Loading and login header logos remain embedded and keep their independent sizes.
 

@@ -1,6 +1,6 @@
 # Validation
 
-Current validation result: **136 Python tests and 7 DOM tests passed**. Ruff lint and format checks
+Current validation result: **124 Python tests and 7 DOM tests passed**. Ruff lint and format checks
 also passed. The test run emitted dependency deprecation warnings from aiohttp
 and backoff; no integration test failed. A headless browser could not be
 provisioned in the development environment, so no browser visual test is claimed.
@@ -79,24 +79,13 @@ Browser login/MFA should also be verified on the target HA instance.
 These are server/DOM tests; they do not simulate Android's OS splash or Chrome's
 installed-web-app update schedule. Those need testing on the target device.
 
-## HTML5 notification coverage
+## HTML5 notification isolation
 
-- Real Core 2026.10.4 legacy and entity notification builders with outbound push
-  mocked: default badge, explicit overrides, click URLs, images and dismiss calls.
-- Original large-icon defaults are retained; HTML5 sends without a large image
-  continue to omit that image.
-- White 96-pixel badge generation, preserved transparent cutouts, flat opaque
-  background removal.
-- Public image downloads and 404 responses after unload through live aiohttp.
-- HTML5 loading before/after branding, canceled listeners, unload during import,
-  repeated reloads, later hook ownership and inactive retained wrappers.
-- Setup failure/cancellation restores already installed presentation hooks.
-- No artwork leaves HTML5 unloaded; unfamiliar HTML5 helpers keep stock defaults.
-
-The fetched Core 2026.11.0 notify source was additionally exercised locally for
-native/generic sends, overrides, dismiss and exact restoration, with push mocked.
-This is a notification-source compatibility check, not a full Core 2026.11 test.
-Actual Android notification rendering still needs a new notification on a device.
+- Setup and unload leave an already-loaded HTML5 notify platform's defaults and
+  entity methods unchanged.
+- Branding does not import the notify platform or register component-loaded
+  listeners, whether HTML5 is already loaded or absent.
+- Installed-app, favicon and login branding remain covered separately.
 
 ## Browser validation checklist
 
@@ -124,7 +113,7 @@ must be reloaded after disabling or removal.
 The 0.1.10 app-icon change was also checked against the reported transparent
 white artwork: the old icon flattened to an almost-white square; the new app
 icons have an opaque dark background. Automated checks cover contrast, alpha,
-maskable safe-zone containment and unchanged favicon/badge transparency. Actual
+maskable safe-zone containment and unchanged favicon transparency. Actual
 Samsung notification rendering and installed-icon refresh remain device checks.
 
 A post-release HTTP test loads a transparent white source through the integration,
