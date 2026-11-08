@@ -10,7 +10,7 @@ from hashlib import sha256
 from aiohttp import web
 from homeassistant.components import frontend
 from homeassistant.components.http import HomeAssistantView
-from PIL import Image, ImageChops, ImageOps
+from PIL import Image, ImageChops, ImageOps, ImageStat
 
 from .branding import Branding
 from .const import DOMAIN
@@ -35,7 +35,7 @@ def prepare_mobile_assets(branding: Branding) -> MobileAssets:
     """Generate mobile-compatible square PNGs from already validated images."""
     files = {}
 
-    def icon(data_uri, size, badge=False):
+    def icon(data_uri, size, badge=False, app=False, maskable=False):
         data = base64.b64decode(data_uri.split(",", 1)[1], validate=True)
         with Image.open(io.BytesIO(data)) as image:
             pixels = image.convert("RGBA")
@@ -46,6 +46,8 @@ def prepare_mobile_assets(branding: Branding) -> MobileAssets:
             canvas.alpha_composite(
                 scaled, ((size - scaled.width) // 2, (size - scaled.height) // 2)
             )
+            if app:
+                canvas = app_icon(pixels, size, maskable=maskable)
         output = io.BytesIO()
         canvas.save(output, format="PNG")
         content = output.getvalue()
@@ -60,22 +62,51 @@ def prepare_mobile_assets(branding: Branding) -> MobileAssets:
     if branding.pwa_enabled and source:
         icons = [
             {
-                "src": icon(source, size),
+                "src": icon(source, size, app=True),
                 "sizes": f"{size}x{size}",
                 "type": "image/png",
                 "purpose": "any",
             }
             for size in (192, 512)
         ]
-        touch_url = icon(source, 180)
+        icons.append(
+            {
+                "src": icon(source, 512, app=True, maskable=True),
+                "sizes": "512x512",
+                "type": "image/png",
+                "purpose": "maskable",
+            }
+        )
+        touch_url = icon(source, 180, app=True)
     elif branding.favicon:
-        touch_url = icon(branding.favicon, 180)
+        touch_url = icon(branding.favicon, 180, app=True)
     # Notification artwork is independent of installed-web-app branding.
     notification_source = branding.favicon or branding.pwa_icon or branding.light or branding.dark
     notification_badge_url = (
         icon(notification_source, 96, badge=True) if notification_source else None
     )
     return MobileAssets(files, icons, favicon_url, touch_url, notification_badge_url)
+
+
+def app_icon(image: Image.Image, size: int, *, maskable: bool = False) -> Image.Image:
+    """Keep pale artwork visible on native launchers and notification app icons."""
+    # Android can flatten transparent purpose=any icons onto white. Choose the
+    # backing ourselves, weighting brightness by alpha so invisible RGB does not
+    # influence the result. Favicon and notification badge pixels stay separate.
+    alpha_mean = ImageStat.Stat(image.getchannel("A")).mean[0]
+    black = Image.new("RGBA", image.size, "black")
+    black.alpha_composite(image)
+    rgb = ImageStat.Stat(black.convert("RGB")).mean
+    brightness = sum(v * w for v, w in zip(rgb, (0.2126, 0.7152, 0.0722)))
+    brightness = brightness * 255 / alpha_mean if alpha_mean else 0
+    background = "#20313b" if brightness >= 128 else "#f5f5f5"
+    canvas = Image.new("RGBA", (size, size), background)
+    # All four corners of a 56%-width square fit inside the maskable safe circle
+    # (radius 40%). Keep even rectangular artwork inside that square.
+    limit = int(size * 0.56) if maskable else size
+    scaled = ImageOps.contain(image, (limit, limit), Image.Resampling.LANCZOS)
+    canvas.alpha_composite(scaled, ((size - scaled.width) // 2, (size - scaled.height) // 2))
+    return canvas
 
 
 def notification_badge(image: Image.Image) -> Image.Image:

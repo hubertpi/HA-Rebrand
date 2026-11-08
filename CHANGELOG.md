@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.1.10
+
+- Give installed app and Apple touch icons an opaque contrasting background so
+  transparent white artwork stays visible on Android notification app icons.
+- Add a separate maskable app icon with safe padding for Android launcher shapes.
+- Keep favicon, loading-logo and small notification-badge transparency intact.
+- Includes 0.1.9's removal of the unwanted large notification image from 0.1.8.
+- Existing shortcuts may need removal and recreation to refresh cached app icons.
+
 ## 0.1.9
 
 - Limit HTML5 notification customization to the small Android badge.

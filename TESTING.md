@@ -1,6 +1,6 @@
 # Validation
 
-Release validation result: **130 Python tests and 7 DOM tests passed**. Ruff lint and format checks
+Release validation result: **135 Python tests and 7 DOM tests passed**. Ruff lint and format checks
 also passed. The test run emitted dependency deprecation warnings from aiohttp
 and backoff; no integration test failed. A headless browser could not be
 provisioned in the development environment, so no browser visual test is claimed.
@@ -120,3 +120,9 @@ The native Companion app splash/icon is outside this version's scope.
 Android's installed web app splash uses manifest branding, but Android controls
 its layout and Chrome controls installed-icon refresh. A custom title only persists within the loaded frontend document; tabs
 must be reloaded after disabling or removal.
+
+The 0.1.10 app-icon change was also checked against the reported transparent
+white artwork: the old icon flattened to an almost-white square; the new app
+icons have an opaque dark background. Automated checks cover contrast, alpha,
+maskable safe-zone containment and unchanged favicon/badge transparency. Actual
+Samsung notification rendering and installed-icon refresh remain device checks.

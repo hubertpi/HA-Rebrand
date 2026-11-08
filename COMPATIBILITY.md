@@ -123,8 +123,12 @@ values are retained and restored only while the field still equals our installed
 value. HA's app id, start URL, scope, theme fields and other metadata remain intact.
 
 The icon source is the explicit web app icon, then favicon, then a loading logo.
-The integration produces 192/512 pixel square icons with transparent padding,
-marked purpose any rather than maskable to avoid cropping an arbitrary logo.
+The integration produces opaque 192/512 pixel purpose-any app icons and a
+separate 512 pixel purpose-maskable icon. Transparent light artwork is composited
+on dark slate; dark artwork uses light gray. The maskable artwork fits within
+the central 40%-radius safe circle. This prevents white artwork disappearing
+when Android otherwise flattens transparent app icons onto white. The app-icon
+background is separate from the transparent favicon and notification badge.
 Browser favicons use 64 pixel PNG URLs and touch icons use 180 pixel PNG URLs.
 Loading and login header logos remain embedded and keep their independent sizes.
 

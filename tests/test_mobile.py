@@ -7,10 +7,11 @@ from dataclasses import replace
 from hashlib import sha256
 from types import SimpleNamespace
 
+import pytest
 from aiohttp import web
 from aiohttp.test_utils import TestClient, TestServer
 from homeassistant.components import frontend
-from PIL import Image
+from PIL import Image, ImageChops, ImageDraw
 
 from custom_components.ha_rebrand_local import async_setup_entry, async_unload_entry
 from custom_components.ha_rebrand_local.branding import Branding, load_branding
@@ -18,6 +19,7 @@ from custom_components.ha_rebrand_local.const import DOMAIN
 from custom_components.ha_rebrand_local.mobile import (
     ICON_PATH,
     IconView,
+    app_icon,
     ensure_icon_view,
     prepare_manifest,
     prepare_mobile_assets,
@@ -50,7 +52,8 @@ def test_square_icon_sizes_and_content_addresses(png):
         assert sha256(content).hexdigest() + ".png" == item["src"].split("/")[-1]
         with Image.open(io.BytesIO(content)) as image:
             assert f"{image.width}x{image.height}" == item["sizes"]
-        assert item["purpose"] == "any"
+        assert item["purpose"] in {"any", "maskable"}
+    assert [item["purpose"] for item in assets.icons] == ["any", "any", "maskable"]
 
 
 def test_wide_logo_is_padded_without_stretching_or_cropping():
@@ -59,7 +62,49 @@ def test_wide_logo_is_padded_without_stretching_or_cropping():
     assets = prepare_mobile_assets(brand(output.getvalue()))
     entry = next(item for item in assets.icons if item["sizes"] == "512x512")
     with Image.open(io.BytesIO(assets.files[entry["src"].split("/")[-1]])) as image:
-        assert image.getbbox() == (0, 192, 512, 320)
+        backing = Image.new("RGB", image.size, image.getpixel((0, 0))[:3])
+        assert ImageChops.difference(image.convert("RGB"), backing).getbbox() == (0, 192, 512, 320)
+
+
+@pytest.mark.parametrize(
+    ("foreground", "invisible_rgb", "background"),
+    [
+        ("white", (0, 0, 0, 0), (32, 49, 59, 255)),
+        ("black", (255, 255, 255, 0), (245, 245, 245, 255)),
+        ("white", (255, 0, 255, 0), (32, 49, 59, 255)),
+    ],
+)
+def test_app_artwork_contrasts_with_opaque_backing(foreground, invisible_rgb, background):
+    source = Image.new("RGBA", (64, 64), invisible_rgb)
+    ImageDraw.Draw(source).ellipse((16, 16, 48, 48), fill=foreground)
+    result = app_icon(source, 192)
+    assert result.getchannel("A").getextrema() == (255, 255)
+    assert result.getpixel((0, 0)) == background
+    assert result.getpixel((96, 96))[:3] == source.getpixel((32, 32))[:3]
+    assert source.getpixel((0, 0)) == invisible_rgb
+
+
+def test_maskable_entire_artwork_fits_safe_circle():
+    result = app_icon(Image.new("RGBA", (100, 100), "white"), 512, maskable=True)
+    for y in range(512):
+        for x in range(512):
+            if result.getpixel((x, y)) != (32, 49, 59, 255):
+                assert (x - 255.5) ** 2 + (y - 255.5) ** 2 <= (512 * 0.4) ** 2
+
+
+def test_app_backing_does_not_flatten_favicon_or_badge():
+    source = Image.new("RGBA", (64, 64))
+    ImageDraw.Draw(source).ellipse((16, 16, 48, 48), fill="white")
+    output = io.BytesIO()
+    source.save(output, format="PNG")
+    assets = prepare_mobile_assets(brand(output.getvalue()))
+    for url in (assets.favicon_url, assets.notification_badge_url):
+        with Image.open(io.BytesIO(assets.files[url.split("/")[-1]])) as image:
+            assert image.getpixel((0, 0))[3] == 0
+    for url in [item["src"] for item in assets.icons] + [assets.touch_url]:
+        with Image.open(io.BytesIO(assets.files[url.split("/")[-1]])) as image:
+            assert image.getchannel("A").getextrema() == (255, 255)
+    assert assets.icons == prepare_mobile_assets(brand(output.getvalue())).icons
 
 
 def test_icon_url_changes_when_pixels_change(png):

@@ -154,9 +154,14 @@ favicon; if there is no favicon, it uses your light or dark loading logo.
 For a company logo on the Android splash instead of your browser favicon,
 enter that PNG explicitly in this field.
 
-The integration produces square 192 and 512 pixel PNG icons, preserving and
-padding the original proportions without cropping. A square high-resolution
-source gives the clearest app icon. Browser favicons use normal PNG URLs,
+The integration produces square 192 and 512 pixel PNG app icons, preserving
+the original proportions. App and Apple touch icons get an opaque background:
+dark slate for light artwork, light gray for dark artwork. This keeps a white
+transparent logo visible when Android shows the installed app icon in
+notifications. A separate 512 pixel maskable icon includes safe padding so
+Android can shape the icon without clipping the artwork. Your browser favicon,
+loading logos and small notification badge retain their transparency. A square
+high-resolution source gives the clearest app icon. Browser favicons use normal PNG URLs,
 rather than embedded data URLs, for mobile compatibility. Touch-icon links are
 also updated.
 
