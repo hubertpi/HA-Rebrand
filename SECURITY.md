@@ -43,8 +43,8 @@ See COMPATIBILITY.md for both exact hooks and the recovery path.
 
 ## HTML5 notification artwork
 
-HTML5 notification branding changes only default icon/badge URLs and fills
-missing artwork keywords before delegating to HA's original push helper. It
+HTML5 notification branding changes only the default badge URL and fills
+the missing badge keyword before delegating to HA's original push helper. It
 does not read notification credentials or handle push transport. Explicit
 artwork, notification data, click actions, targets and dismiss messages retain
 their existing behavior. White badge PNGs are generated from validated local

@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.9
+
+- Limit HTML5 notification customization to the small Android badge.
+- Remove the additional large notification image introduced in 0.1.8.
+- Preserve HA's original large-icon defaults and all explicit notification images.
+
 ## 0.1.8
 
 - Apply configured branding to HTML5 notification icons and Android status-bar

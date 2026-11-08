@@ -28,7 +28,6 @@ class MobileAssets:
     icons: list[dict] | None
     favicon_url: str | None
     touch_url: str | None
-    notification_icon_url: str | None = None
     notification_badge_url: str | None = None
 
 
@@ -73,13 +72,10 @@ def prepare_mobile_assets(branding: Branding) -> MobileAssets:
         touch_url = icon(branding.favicon, 180)
     # Notification artwork is independent of installed-web-app branding.
     notification_source = branding.favicon or branding.pwa_icon or branding.light or branding.dark
-    notification_icon_url = icon(notification_source, 192) if notification_source else None
     notification_badge_url = (
         icon(notification_source, 96, badge=True) if notification_source else None
     )
-    return MobileAssets(
-        files, icons, favicon_url, touch_url, notification_icon_url, notification_badge_url
-    )
+    return MobileAssets(files, icons, favicon_url, touch_url, notification_badge_url)
 
 
 def notification_badge(image: Image.Image) -> Image.Image:

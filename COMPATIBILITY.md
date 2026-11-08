@@ -84,10 +84,10 @@ HTML5 notification branding was checked against Core `2026.10.4` and the
 imports its notify platform through HA's native integration loader. It does not
 enable HTML5 or install push dependencies when HTML5 is absent.
 
-Legacy notifications and generic notify actions read the module's `DEFAULT_ICON`
-and `DEFAULT_BADGE` values at send time. HA Rebrand replaces those presentation
-defaults in memory. For `html5.send_message`, a reversible wrapper around
-`HTML5NotifyEntity._webpush` fills missing artwork keywords for this HA instance
+Legacy notifications and generic notify actions read the module's `DEFAULT_BADGE`
+value at send time. HA Rebrand replaces that presentation
+default in memory. For `html5.send_message`, a reversible wrapper around
+`HTML5NotifyEntity._webpush` fills the missing badge keyword for this HA instance
 before delegating to the original method. Explicit values and dismiss calls are
 preserved. Notification bodies, actions, recipients, signing, credentials and
 delivery remain with the original HTML5 implementation.

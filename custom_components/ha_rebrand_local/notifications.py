@@ -18,10 +18,7 @@ class NotificationBranding:
 
     def __init__(self, hass, assets: MobileAssets):
         self.hass = hass
-        self.defaults = {
-            "icon": assets.notification_icon_url,
-            "badge": assets.notification_badge_url,
-        }
+        self.defaults = {"badge": assets.notification_badge_url}
         self.active = True
         self.unsubscribe = None
         self.module = None
@@ -31,7 +28,7 @@ class NotificationBranding:
         self.wrapper = None
 
     async def start(self):
-        if not self.active or not self.defaults["icon"]:
+        if not self.active or not self.defaults["badge"]:
             return
         if "html5" in self.hass.config.components:
             await self._install()
@@ -55,7 +52,6 @@ class NotificationBranding:
             if not self.active or self.module is not None:
                 return
             original_defaults = {
-                "icon": module.DEFAULT_ICON,
                 "badge": module.DEFAULT_BADGE,
             }
             entity_class = module.HTML5NotifyEntity
@@ -83,7 +79,6 @@ class NotificationBranding:
         self.entity_class = entity_class
         self.original_webpush = original_webpush
         self.wrapper = branded_webpush
-        module.DEFAULT_ICON = self.defaults["icon"]
         module.DEFAULT_BADGE = self.defaults["badge"]
         # html5.send_message can omit artwork entirely, so fill only missing
         # keyword arguments immediately before HA builds its own push payload.

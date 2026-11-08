@@ -58,9 +58,6 @@ def test_transparent_badge_is_white_and_keeps_cutouts(artwork):
     assert badge.getpixel((0, 0))[3] == 0
     assert badge.getpixel((48, 48))[3] == 0
     assert badge.getpixel((30, 30)) == (255, 255, 255, 255)
-    icon = read_icon(assets, assets.notification_icon_url)
-    assert icon.size == (192, 192)
-    assert icon.getpixel((60, 60)) == (255, 0, 0, 255)
 
 
 @pytest.mark.parametrize("background,foreground", [("#20313b", "white"), ("white", "black")])
@@ -90,11 +87,13 @@ async def test_legacy_notification_defaults_and_explicit_overrides(hook, monkeyp
     service.hass = hook.hass
     service._push_message = AsyncMock()
     monkeypatch.setattr(html5, "deprecated_notify_action_call", lambda *args: None)
+    original_icon = html5.DEFAULT_ICON
     await hook.start()
     data = {"image": "/local/snapshot.jpg", "url": "/dashboard/camera", "ttl": 0}
     await service.async_send_message("Doorbell", title="Shipping", data=data)
     payload = service._push_message.await_args.args[0]
-    assert payload["icon"] == hook.defaults["icon"]
+    assert payload["icon"] == original_icon
+    assert html5.DEFAULT_ICON == original_icon
     assert payload["badge"] == hook.defaults["badge"]
     assert payload["body"] == "Doorbell"
     assert payload["image"] == data["image"]
@@ -127,18 +126,20 @@ async def test_native_actions_defaults_explicit_values_and_dismiss(hook, monkeyp
     push = AsyncMock(return_value=SimpleNamespace(raise_for_status=lambda: None))
     monkeypatch.setattr(html5, "webpush_async", push)
     monkeypatch.setattr(html5, "add_jwt", lambda *args: "test-jwt")
+    original_icon = html5.DEFAULT_ICON
     await hook.start()
     entity = make_entity(hook.hass)
     await entity.async_send_message("Generic notification", "Title")
     payload = json.loads(push.await_args.args[1])
-    assert payload["icon"] == hook.defaults["icon"]
+    assert payload["icon"] == original_icon
+    assert html5.DEFAULT_ICON == original_icon
     assert payload["badge"] == hook.defaults["badge"]
     assert payload["body"] == "Generic notification"
     await entity.send_push_notification(
         message="Doorbell", title="Shipping", data={"url": "/camera"}, image="/snapshot.jpg"
     )
     payload = json.loads(push.await_args.args[1])
-    assert payload["icon"] == hook.defaults["icon"]
+    assert "icon" not in payload
     assert payload["badge"] == hook.defaults["badge"]
     assert payload["data"] == {"url": "/camera", "jwt": "test-jwt"}
     assert payload["image"] == "/snapshot.jpg"
@@ -159,7 +160,7 @@ async def test_exact_restore_and_no_wrappers_after_repeated_reload(hook):
     for _ in range(3):
         instance = NotificationBranding(
             hook.hass,
-            SimpleNamespace(notification_icon_url="/icon.png", notification_badge_url="/badge.png"),
+            SimpleNamespace(notification_badge_url="/badge.png"),
         )
         await instance.start()
         assert html5.HTML5NotifyEntity._webpush is not original
@@ -201,7 +202,7 @@ async def test_late_html5_setup_and_unload_cancel_listener(hook):
     hook.restore()
     second = NotificationBranding(
         hook.hass,
-        SimpleNamespace(notification_icon_url="/icon.png", notification_badge_url="/badge.png"),
+        SimpleNamespace(notification_badge_url="/badge.png"),
     )
     await second.start()
     second.restore()
@@ -257,7 +258,7 @@ async def test_real_setup_and_unload_serve_then_remove_notification_artwork(
 async def test_no_artwork_does_not_load_html5_or_attach_a_listener(hook):
     instance = NotificationBranding(
         SimpleNamespace(),
-        SimpleNamespace(notification_icon_url=None, notification_badge_url=None),
+        SimpleNamespace(notification_badge_url=None),
     )
     await instance.start()
     assert instance.module is None

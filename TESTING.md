@@ -82,9 +82,11 @@ installed-web-app update schedule. Those need testing on the target device.
 ## HTML5 notification coverage
 
 - Real Core 2026.10.4 legacy and entity notification builders with outbound push
-  mocked: default artwork, explicit overrides, click URLs, images and dismiss calls.
+  mocked: default badge, explicit overrides, click URLs, images and dismiss calls.
+- Original large-icon defaults are retained; HTML5 sends without a large image
+  continue to omit that image.
 - White 96-pixel badge generation, preserved transparent cutouts, flat opaque
-  background removal, and separate 192-pixel notification artwork.
+  background removal.
 - Public image downloads and 404 responses after unload through live aiohttp.
 - HTML5 loading before/after branding, canceled listeners, unload during import,
   repeated reloads, later hook ownership and inactive retained wrappers.
