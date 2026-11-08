@@ -41,6 +41,17 @@ require an integration update. Guards reject changed markers at setup, runtime
 failure falls back to original HTML, and unload restores the previous template.
 See COMPATIBILITY.md for both exact hooks and the recovery path.
 
+## HTML5 notification artwork
+
+HTML5 notification branding changes only default icon/badge URLs and fills
+missing artwork keywords before delegating to HA's original push helper. It
+does not read notification credentials or handle push transport. Explicit
+artwork, notification data, click actions, targets and dismiss messages retain
+their existing behavior. White badge PNGs are generated from validated local
+artwork in the executor and served through the same public icon endpoint.
+Disabling/removing HA Rebrand restores owned HTML5 presentation defaults and
+deactivates the wrapper, including if HTML5 was still loading.
+
 ## Reporting a problem
 
 Open an issue at https://github.com/hubertpi/HA-Rebrand/issues with versions and

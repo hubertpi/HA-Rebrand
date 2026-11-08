@@ -175,6 +175,24 @@ This feature does not change the native HA Companion application's own splash
 or app icon. Existing installed web apps may update automatically, but their
 refresh schedule is controlled by Chrome/Android.
 
+## HTML5 notification icons
+
+HA Rebrand automatically supplies default artwork for HTML5 push notifications.
+Existing notification automations use the configured favicon, falling back to
+the Android/web app icon and then a loading logo. No notification YAML changes
+are needed. This also works when Android/web app manifest branding is disabled.
+
+The notification image is generated at 192 pixels. Android's small status-bar
+badge is a separate 96-pixel white silhouette. Transparent backgrounds and
+cutouts are preserved. For opaque images, the top-left pixel is treated as the
+background color and matching colors are removed from the badge. A simple logo
+on a flat background works best; complex photographs are unsuitable as badges.
+
+Supported actions include legacy `notify.html5_*`, `notify.send_message` for
+HTML5 entities, and `html5.send_message`. Explicit `icon` or `badge` values in
+individual notifications take precedence. New notifications use changed settings
+after the integration reloads; notifications already displayed keep their artwork.
+
 ## Settings
 
 | Option | What it does |

@@ -41,7 +41,8 @@ def make_harness(tmp_path, monkeypatch, real_login=False):
             frontend.DATA_EXTRA_MODULE_URL: SimpleNamespace(urls=frozenset()),
             frontend.DATA_EXTRA_JS_URL_ES5: SimpleNamespace(urls=frozenset()),
         },
-        config=SimpleNamespace(config_dir=str(tmp_path), safe_mode=False),
+        config=SimpleNamespace(config_dir=str(tmp_path), safe_mode=False, components=set()),
+        bus=SimpleNamespace(async_listen=lambda *args: lambda: None),
         async_add_executor_job=executor,
         http=SimpleNamespace(app=app),
     )

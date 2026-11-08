@@ -86,7 +86,8 @@ def test_loading_logo_fallback_and_pwa_disabled(png):
     assert prepare_mobile_assets(settings).icons is not None
     disabled = prepare_mobile_assets(replace(settings, pwa_enabled=False))
     assert disabled.icons is None
-    assert disabled.files == {}
+    assert disabled.notification_icon_url is not None
+    assert disabled.notification_badge_url is not None
 
 
 def test_manifest_restoration_preserves_identity_and_unrelated_fields(harness, png):

@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.1.8
+
+- Apply configured branding to HTML5 notification icons and Android status-bar
+  badges automatically, including existing notification automations.
+- Generate white badges with transparent cutouts and remove flat backgrounds
+  from opaque source artwork to avoid solid notification blocks.
+- Preserve explicit notification artwork, support HTML5 loading before or after
+  HA Rebrand, and restore owned defaults and hooks on disable or removal.
+
 ## 0.1.7
 
 - Add configurable Android/installed-web-app branding through HA's native

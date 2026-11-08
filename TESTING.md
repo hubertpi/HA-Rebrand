@@ -1,6 +1,6 @@
 # Validation
 
-Release validation result: **116 Python tests and 7 DOM tests passed**. Ruff lint and format checks
+Release validation result: **130 Python tests and 7 DOM tests passed**. Ruff lint and format checks
 also passed. The test run emitted dependency deprecation warnings from aiohttp
 and backoff; no integration test failed. A headless browser could not be
 provisioned in the development environment, so no browser visual test is claimed.
@@ -78,6 +78,23 @@ Browser login/MFA should also be verified on the target HA instance.
 
 These are server/DOM tests; they do not simulate Android's OS splash or Chrome's
 installed-web-app update schedule. Those need testing on the target device.
+
+## HTML5 notification coverage
+
+- Real Core 2026.10.4 legacy and entity notification builders with outbound push
+  mocked: default artwork, explicit overrides, click URLs, images and dismiss calls.
+- White 96-pixel badge generation, preserved transparent cutouts, flat opaque
+  background removal, and separate 192-pixel notification artwork.
+- Public image downloads and 404 responses after unload through live aiohttp.
+- HTML5 loading before/after branding, canceled listeners, unload during import,
+  repeated reloads, later hook ownership and inactive retained wrappers.
+- Setup failure/cancellation restores already installed presentation hooks.
+- No artwork leaves HTML5 unloaded; unfamiliar HTML5 helpers keep stock defaults.
+
+The fetched Core 2026.11.0 notify source was additionally exercised locally for
+native/generic sends, overrides, dismiss and exact restoration, with push mocked.
+This is a notification-source compatibility check, not a full Core 2026.11 test.
+Actual Android notification rendering still needs a new notification on a device.
 
 ## Browser validation checklist
 

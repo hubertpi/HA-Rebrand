@@ -25,7 +25,7 @@ restoring a different template object consequently selects a different cached
 response without clearing the global render cache or changing other integrations.
 
 The hook is intentionally limited to the standard packaged frontend. Frontend
-development repositories are rejected. No class method, router collection,
+development repositories are rejected. No frontend class method, router collection,
 authentication API view, or HA package file is changed.
 
 ## Login presentation hook
@@ -76,6 +76,26 @@ frontend layout retaining the same markers will look correct.
 
 The supported loading logo is an image referencing
 `/static/images/home-assistant-logo-loading.svg`.
+
+## HTML5 notification artwork
+
+HTML5 notification branding was checked against Core `2026.10.4` and the
+`2026.11.0` notification source. The integration waits for HTML5 to load and
+imports its notify platform through HA's native integration loader. It does not
+enable HTML5 or install push dependencies when HTML5 is absent.
+
+Legacy notifications and generic notify actions read the module's `DEFAULT_ICON`
+and `DEFAULT_BADGE` values at send time. HA Rebrand replaces those presentation
+defaults in memory. For `html5.send_message`, a reversible wrapper around
+`HTML5NotifyEntity._webpush` fills missing artwork keywords for this HA instance
+before delegating to the original method. Explicit values and dismiss calls are
+preserved. Notification bodies, actions, recipients, signing, credentials and
+delivery remain with the original HTML5 implementation.
+
+The defaults and private helper are compatibility-sensitive. An unfamiliar
+helper is logged and left intact. Unload cancels pending setup listeners,
+prevents late imports from installing hooks, restores owned defaults/methods,
+and preserves later third-party changes. A retained wrapper becomes inactive.
 
 ## Cleanup and concurrent customization
 

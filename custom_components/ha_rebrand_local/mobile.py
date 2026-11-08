@@ -10,7 +10,7 @@ from hashlib import sha256
 from aiohttp import web
 from homeassistant.components import frontend
 from homeassistant.components.http import HomeAssistantView
-from PIL import Image, ImageOps
+from PIL import Image, ImageChops, ImageOps
 
 from .branding import Branding
 from .const import DOMAIN
@@ -28,16 +28,21 @@ class MobileAssets:
     icons: list[dict] | None
     favicon_url: str | None
     touch_url: str | None
+    notification_icon_url: str | None = None
+    notification_badge_url: str | None = None
 
 
 def prepare_mobile_assets(branding: Branding) -> MobileAssets:
     """Generate mobile-compatible square PNGs from already validated images."""
     files = {}
 
-    def icon(data_uri, size):
+    def icon(data_uri, size, badge=False):
         data = base64.b64decode(data_uri.split(",", 1)[1], validate=True)
         with Image.open(io.BytesIO(data)) as image:
-            scaled = ImageOps.contain(image.convert("RGBA"), (size, size), Image.Resampling.LANCZOS)
+            pixels = image.convert("RGBA")
+            if badge:
+                pixels = notification_badge(pixels)
+            scaled = ImageOps.contain(pixels, (size, size), Image.Resampling.LANCZOS)
             canvas = Image.new("RGBA", (size, size))
             canvas.alpha_composite(
                 scaled, ((size - scaled.width) // 2, (size - scaled.height) // 2)
@@ -66,7 +71,32 @@ def prepare_mobile_assets(branding: Branding) -> MobileAssets:
         touch_url = icon(source, 180)
     elif branding.favicon:
         touch_url = icon(branding.favicon, 180)
-    return MobileAssets(files, icons, favicon_url, touch_url)
+    # Notification artwork is independent of installed-web-app branding.
+    notification_source = branding.favicon or branding.pwa_icon or branding.light or branding.dark
+    notification_icon_url = icon(notification_source, 192) if notification_source else None
+    notification_badge_url = (
+        icon(notification_source, 96, badge=True) if notification_source else None
+    )
+    return MobileAssets(
+        files, icons, favicon_url, touch_url, notification_icon_url, notification_badge_url
+    )
+
+
+def notification_badge(image: Image.Image) -> Image.Image:
+    """Make a white Android silhouette, keeping existing transparent cutouts."""
+    alpha = image.getchannel("A")
+    if alpha.getextrema() == (255, 255):
+        # An opaque background becomes a solid square in Android's status bar.
+        # Infer a flat background from the top-left pixel. Color distance also
+        # handles white logos on dark backgrounds and dark logos on white ones.
+        rgb = image.convert("RGB")
+        background = Image.new("RGB", image.size, rgb.getpixel((0, 0)))
+        red, green, blue = ImageChops.difference(rgb, background).split()
+        alpha = ImageChops.lighter(ImageChops.lighter(red, green), blue)
+        alpha = alpha.point(lambda value: min(255, max(0, (value - 16) * 4)))
+    result = Image.new("RGBA", image.size, "white")
+    result.putalpha(alpha)
+    return result
 
 
 def with_mobile_urls(branding: Branding, assets: MobileAssets) -> Branding:
